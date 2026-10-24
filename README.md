@@ -4,11 +4,11 @@ Simulations for the Alice & Bob cat qubit challenge (`ChallengePrompt.md`), done
 
 Run `uv sync`, then `uv run python scripts/task1_0_warmup.py`. Figures go to `plots/` and raw arrays to `results/task1_0.npz`. Task 1.0 runs in about 20 s on a CPU.
 
-## Task 1.0 warm-up on the memory alone
+## Task 1.0: Warm-up — adding dissipation one ingredient at a time
 
 All three parts use one mode truncated at $N = 30$ Fock states. The two-photon rate is $\kappa_2 = 4g_2^2/\kappa_b = 2\pi \times 0.896$ MHz, from $g_2/2\pi = 0.763$ MHz and $\kappa_b/2\pi = 2.6$ MHz. In the Wigner plots a coherent state $|\alpha\rangle$ sits at $(\mathrm{Re}\,\alpha, \mathrm{Im}\,\alpha)$, and the circles in the 1.0(a) figure, drawn at the analytic center, confirm this convention.
 
-### 1.0(a) One-photon loss
+### (a) Single-photon loss, in physical units
 
 With $H = \Delta a^\dagger a$ and jump operator $\sqrt{\kappa}\,a$, the mean field obeys $d\langle a\rangle/dt = -(i\Delta + \kappa/2)\langle a\rangle$. Because $a|\alpha\rangle = \alpha|\alpha\rangle$, a lost photon leaves a coherent state unchanged, so the state stays coherent and only its amplitude moves,
 
@@ -20,7 +20,7 @@ We take $\Delta/2\pi = \kappa/2\pi = 1$ MHz, $\alpha_0 = 2$ and $0 \le t \le 1$ 
 
 ![1.0(a) Wigner snapshots](plots/task1_0a_wigner.png)
 
-### 1.0(b) Two-photon loss
+### (b) Pure two-photon loss
 
 With $H = 0$ and jump operator $\sqrt{\kappa_2}\,a^2$, photons leave only in pairs. The jump $a^2$ and the no-jump term $a^{\dagger 2} a^2$ both keep the photon-number parity, so every even Fock state ends in $|0\rangle$ and every odd one in $|1\rangle$, the two states that $a^2$ annihilates. The final photon number is therefore the odd-parity weight of the initial state,
 
@@ -32,7 +32,7 @@ The simulation gives $\langle a^\dagger a\rangle = 0.499847$ at 1 µs, $1.5 \tim
 
 ![1.0(b) photon number](plots/task1_0b_photon_number.png)
 
-### 1.0(c) Two-photon stabilization
+### (c) Stabilization: two-photon loss + two-photon drive
 
 The jump operator $\sqrt{\kappa_2}\,(a^2 - \alpha^2)$ removes photon pairs and, through the $-\alpha^2$ term, adds them back. Its dark states are $|\pm\alpha\rangle$, since $a^2|\pm\alpha\rangle = \alpha^2|\pm\alpha\rangle$, so the memory settles in the space they span with $\langle a^\dagger a\rangle \approx \alpha^2 = 4.41$ for $\alpha = 2.1$. This jump operator also keeps parity, so the even vacuum goes to the even cat $(|\alpha\rangle + |-\alpha\rangle)/\mathcal N_+$. The second jump operator $\sqrt{\kappa_a}\,a$, with $\kappa_a/2\pi = 9.3$ kHz, flips the parity at each jump and slowly washes out the fringes.
 
