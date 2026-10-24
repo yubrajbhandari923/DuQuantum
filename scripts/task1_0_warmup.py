@@ -1,87 +1,21 @@
 """Task 1.0 warm-up on the memory alone: one-photon loss, two-photon loss, two-photon stabilization."""
-from pathlib import Path
-
-import matplotlib
-matplotlib.use('Agg')
-import matplotlib.pyplot as plt
 import dynamiqs as dq
 import jax.numpy as jnp
 import numpy as np
 
-try:
-    import scienceplots  # noqa: F401
-    plt.style.use(['science', 'no-latex', 'bright'])
-except ImportError:
-    plt.style.use('default')
-
-dq.set_precision('double')
-
-ROOT = Path(__file__).resolve().parents[1]
-PLOTS, RESULTS = ROOT / 'plots', ROOT / 'results'
-PLOTS.mkdir(exist_ok=True)
-RESULTS.mkdir(exist_ok=True)
-
-COLORS = ['tab:blue', 'tab:orange', 'tab:green', 'tab:red', 'tab:purple']
-TWO_PI = 2 * jnp.pi
-
-# provided parameters, rad/us
-g2 = TWO_PI * 0.763
-kappa_b = TWO_PI * 2.6
-kappa_a = TWO_PI * 9.3e-3
-alpha = 2.1
-kappa2 = 4 * g2**2 / kappa_b
+from common import METHOD, COLORS, RESULTS, TWO_PI, alpha, kappa2, kappa_a, save, style, wigner_mosaic
+import matplotlib.pyplot as plt
 
 N = 30
 a = dq.destroy(N)
 n_op = a.dag() @ a
 
 
-def set_spine_width(ax, lw=1.5):
-    for s in ax.spines.values():
-        s.set_linewidth(lw)
-
-
-def style(ax, xlabel, ylabel, title):
-    ax.set_xlabel(xlabel, fontsize=18)
-    ax.set_ylabel(ylabel, fontsize=18)
-    ax.set_title(title, fontsize=20)
-    ax.tick_params(labelsize=16)
-    ax.legend(fontsize=14, frameon=True, edgecolor='black')
-    set_spine_width(ax)
-
-
-def save(fig, name):
-    fig.savefig(PLOTS / name, dpi=400, bbox_inches='tight')
-    plt.close(fig)
-    print(f'wrote {PLOTS / name}', flush=True)
-
-
-def wigner_mosaic(states, times, name, title, xmax, centers=None, path=None):
-    fig, axes = plt.subplots(2, 3, figsize=(15, 10), dpi=300, layout='constrained')
-    for ax, rho, t in zip(axes.flat, states, times):
-        dq.plot.wigner(rho, ax=ax, xmax=xmax, npixels=201, colorbar=False)
-        if path is not None:
-            ax.plot(path.real, path.imag, color='black', lw=0.8)
-        if centers is not None:
-            c = centers[times.index(t)]
-            ax.plot(c.real, c.imag, 'o', mfc='none', mec='black', ms=6)
-        ax.set_title(rf'$t$ = {t:g} $\mu$s', fontsize=20)
-        ax.set_xlabel(r'Re $\alpha$', fontsize=18)
-        ax.set_ylabel(r'Im $\alpha$', fontsize=18)
-        ax.tick_params(labelsize=16)
-        ax.label_outer()
-        set_spine_width(ax)
-    cb = fig.colorbar(axes.flat[0].images[0], ax=axes, shrink=0.8)
-    cb.set_label(r'$W(\alpha)$', fontsize=18)
-    cb.ax.tick_params(labelsize=16)
-    fig.suptitle(title, fontsize=20)
-    save(fig, name)
-
 
 # (a) rotation plus one-photon loss, exaggerated kappa
 Delta, kappa, alpha0 = TWO_PI * 1.0, TWO_PI * 1.0, 2.0
 t_a = jnp.linspace(0.0, 1.0, 201)
-res_a = dq.mesolve(Delta * n_op, [jnp.sqrt(kappa) * a], dq.coherent(N, alpha0), t_a, exp_ops=[n_op])
+res_a = dq.mesolve(Delta * n_op, [jnp.sqrt(kappa) * a], dq.coherent(N, alpha0), t_a, exp_ops=[n_op], method=METHOD)
 n_a = res_a.expects[0].real
 n_a_exact = alpha0**2 * jnp.exp(-kappa * t_a)
 center_a = alpha0 * jnp.exp(-(1j * Delta + kappa / 2) * t_a)  # |alpha0 e^{-(i Delta + kappa/2) t}>
@@ -106,7 +40,7 @@ wigner_mosaic([res_a.states[i] for i in idx], snap_a, 'task1_0a_wigner.png',
 # (b) pure two-photon loss
 t_b = jnp.linspace(0.0, 1.0, 1001)
 res_b = dq.mesolve(dq.zeros(N), [jnp.sqrt(kappa2) * a @ a], dq.coherent(N, alpha0), t_b,
-                   exp_ops=[n_op], save_states=False)
+                   exp_ops=[n_op], save_states=False, method=METHOD)
 n_b = res_b.expects[0].real
 n_b_exact = (1 - jnp.exp(-2 * alpha0**2)) / 2  # odd-parity weight of |alpha0>, all of it ends in |1>
 print(f'(b) n(1 us) = {n_b[-1]:.6f}, analytic plateau = {n_b_exact:.6f}, '
@@ -123,7 +57,7 @@ save(fig, 'task1_0b_photon_number.png')
 scales = jnp.array([0.25, 1.0, 4.0])
 L2 = jnp.sqrt(scales * kappa2)[:, None, None] * (a @ a - alpha**2 * dq.eye(N))
 t_c = jnp.linspace(0.0, 2.0, 401)
-res_c = dq.mesolve(dq.zeros(N), [L2, jnp.sqrt(kappa_a) * a], dq.fock(N, 0), t_c, exp_ops=[n_op])
+res_c = dq.mesolve(dq.zeros(N), [L2, jnp.sqrt(kappa_a) * a], dq.fock(N, 0), t_c, exp_ops=[n_op], method=METHOD)
 n_c = res_c.expects[:, 0].real
 for s, n in zip(scales, n_c):
     out = jnp.nonzero(jnp.abs(n - n[-1]) > 0.01 * n[-1])[0]
