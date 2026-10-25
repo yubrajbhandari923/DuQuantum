@@ -117,8 +117,24 @@
 
 \figframe[0.66]{Step 3: reading the qubit has a sweet spot}{
   \item A gentle push makes the helper box's signal go up for 0 and down for 1. Read too briefly and the signal is too faint; read too long and the cat may flip while we look
-  \item Best balance: 0.4\% wrong answers. Our trick, making the cat bigger while reading, cuts the mistakes 13 to 18 times
+  \item Each push strength has a best reading time (the dots). The best is 0.4\% wrong answers, with the gentlest push read for 285 microseconds
 }{task2_4_fom}{Readout mistakes against reading time, for four push strengths}
+
+\begin{frame}{Step 4: a bigger cat while reading cuts mistakes 13 to 18 times}
+  \vfill
+  \begin{columns}[c]
+    \column{0.45\textwidth}\centering
+    {\LARGE\color{tabblue} 0.41\% $\to$ 0.023\%}\\[0.5em] gentle push: 18 times fewer mistakes
+    \column{0.45\textwidth}\centering
+    {\LARGE\color{tabblue} 0.87\% $\to$ 0.066\%}\\[0.5em] stronger push: 13 times fewer mistakes
+  \end{columns}
+  \vfill
+  \begin{itemize}\gap
+    \item We grow the cat from 4.4 to 6.25 photons only while reading, then shrink it back
+    \item A bigger cat is harder to knock over, so the push flips it far less. Reading too long still adds mistakes, just much later
+  \end{itemize}
+  \vfill
+\end{frame}
 
 \begin{frame}{What we found}
   \vfill
