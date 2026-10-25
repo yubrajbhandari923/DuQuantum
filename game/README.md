@@ -14,6 +14,20 @@ npm run build      # typecheck + production build into game/dist
 npm test           # vitest: physics and level-mission tests
 ```
 
+## Ask Schrödinger (tutor and voices)
+
+Press `T` or click "Ask Schrödinger" in the study or inside an experiment to text him, or click Speak to ask out loud. Gemini answers as a Socratic teacher, told the current experiment, its objective, notebook page, hints and Heisenberg's wrong claims. ElevenLabs speaks his replies and transcribes your voice. The scripted lines of the cutscene, dialogue and hub barks are recorded in `public/voice/` (197 lines), so they play without any key.
+
+Put the keys in `game/.env.local` (gitignored), then run `npm run dev` or `npm run preview`; the backend is a Vite plugin (`server/tutor.ts`), so the keys never reach the browser:
+
+```bash
+GEMINI_API_KEY=...
+ELEVENLABS_API_KEY=...
+GEMINI_MODEL=gemini-3.5-flash   # optional; the default
+```
+
+Endpoints: `POST /api/tutor/chat` (Gemini generateContent), `/api/tutor/tts` (ElevenLabs `eleven_flash_v2_5`), `/api/tutor/stt` (ElevenLabs `scribe_v1`). Without keys the panel says the tutor is offline and the rest of the game is unchanged. After changing a scripted line, run `node scripts/voice-lines.mjs` to record it (it skips lines already recorded).
+
 Node 20+ is recommended. Everything is client-side; no network access or API keys are needed (fonts are bundled).
 
 ## Play

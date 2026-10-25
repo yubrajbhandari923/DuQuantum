@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { COLLIDERS, WALL } from './layout';
 import { ARRIVAL, BARKS, SCHRO_HINTS, TAUNTS } from '../story/barks';
+import { speak } from '../audio/voice';
 
 export type ActorId = 'heisenberg' | 'schrodinger';
 export type Mode = 'idle' | 'walk' | 'follow' | 'wander' | 'script';
@@ -64,6 +65,7 @@ export const useActors = create<Actors>((set, get) => ({
   }),
   say: (id, text, ms = Math.min(9000, Math.max(3500, 1600 + text.length * 55))) => {
     get().a[id].speech = text ? { text, until: clock.now + ms / 1000 } : null;
+    if (text) speak(id, text);
     set({ a: { ...get().a } });
   },
   reset: () => { for (const k in pending) pending[k as ActorId]?.(); set(initial()); },

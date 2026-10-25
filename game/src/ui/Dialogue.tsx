@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import type { DialogueLine } from '../types';
 import { Portrait } from './Portrait';
 import { play } from '../audio/sfx';
+import { speak, stopSpeaking } from '../audio/voice';
 import { speaker } from '../lab/Characters';
 
 const NAMES = { schrodinger: 'Schrödinger', heisenberg: 'Heisenberg', narrator: 'A note, in cramped handwriting' } as const;
@@ -14,6 +15,8 @@ export function Dialogue({ lines, onDone }: { lines: DialogueLine[]; onDone: () 
   const line = lines[i];
   const full = line?.text.length ?? 0;
   useEffect(() => { speaker.who = line?.who ?? null; return () => { speaker.who = null; }; }, [line]); // lights the speaker's face in the hub
+  useEffect(() => { if (line) speak(line.who, line.text); }, [line]);
+  useEffect(() => stopSpeaking, []);
 
   useEffect(() => {
     setShown(reduced() ? full : 0);

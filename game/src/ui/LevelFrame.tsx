@@ -1,9 +1,10 @@
-import { Suspense, useCallback, useState } from 'react';
+import { Suspense, useCallback, useEffect, useState } from 'react';
 import { LEVELS } from '../story/content';
 import { LEVEL_COUNT, hasSet, useGame } from '../store';
 import { LEVEL_SCREENS } from '../levels';
 import { Dialogue } from './Dialogue';
 import { play } from '../audio/sfx';
+import { tutorLive } from '../tutor/Tutor';
 
 /** Wraps one level: intro dialogue, the bench, hint tiers, reset, and the completion sheet. */
 export function LevelFrame() {
@@ -16,6 +17,7 @@ export function LevelFrame() {
   const [tier, setTier] = useState(0);
   const [objective, setObjective] = useState('');
   const [detail, setDetail] = useState('');
+  useEffect(() => { tutorLive.objective = objective; tutorLive.hints = tier; }, [objective, tier]); // what the tutor is told about this screen
 
   const onComplete = useCallback((r: { score: number; detail: string }) => {
     complete(level, r.score); setDetail(r.detail); setPhase('won'); setOutro(true); play(level === LEVEL_COUNT ? 'rescue' : 'complete');

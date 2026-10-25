@@ -159,3 +159,17 @@ select { background: var(--surface-2); color: var(--text); border: 1px solid var
 .bubble::after { content: ''; position: absolute; left: 50%; bottom: -7px; width: 12px; height: 12px; background: inherit; border: inherit; border-top: 0; border-left: 0; transform: translateX(-50%) rotate(45deg); }
 @keyframes bubble-in { from { opacity: 0; transform: translateY(-40%) scale(0.96); } }
 .hud-top { align-items: flex-start; }
+
+/* Ask Schrödinger: the tutor chat */
+.tutor-open { position: absolute; left: 16px; bottom: 16px; z-index: 25; }
+.tutor { position: absolute; right: 16px; bottom: 16px; z-index: 40; width: min(380px, calc(100vw - 32px)); height: min(560px, calc(100vh - 32px)); display: flex; flex-direction: column; padding: 12px; gap: 10px; }
+.tutor header { display: grid; grid-template-columns: auto 1fr auto auto; gap: 10px; align-items: center; }
+.tutor .who { font-family: var(--font-title); font-size: 20px; }
+.tutor-sub { font-size: 12px; }
+.tutor-log { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; padding-right: 4px; }
+.tutor-log p { margin: 0; padding: 8px 11px; border-radius: 9px; line-height: 1.45; font-size: 14px; }
+.tutor-log .him { background: var(--surface-2); border: 1px solid var(--edge); align-self: flex-start; max-width: 92%; }
+.tutor-log .me { background: color-mix(in srgb, var(--amber) 22%, var(--surface)); align-self: flex-end; max-width: 85%; }
+.tutor-err { color: var(--red); }
+.tutor form { display: flex; gap: 6px; }
+.tutor input { flex: 1; min-width: 0; background: var(--bg); color: var(--text); border: 1px solid var(--edge); border-radius: 7px; padding: 8px 10px; font: inherit; font-size: 14px; }

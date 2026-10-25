@@ -10,6 +10,7 @@ import { LevelFrame } from './ui/LevelFrame';
 import { Blueprint, Notebook, Settings } from './ui/Overlays';
 import { Ending } from './ui/Ending';
 import Sandbox from './levels/Sandbox';
+import { Tutor } from './tutor/Tutor';
 import './styles/theme.css';
 import './styles/ui.css';
 
@@ -39,6 +40,7 @@ export default function App() {
       {panel === 'select' && <Blueprint />}
       {panel === 'notebook' && <Notebook />}
       {panel === 'settings' && <Settings />}
+      <Tutor />
     </div>
   );
 }
