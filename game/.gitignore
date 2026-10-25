@@ -3,3 +3,5 @@ dist
 .DS_Store
 # 125 MB, over the GitHub 100 MB file limit; optimised copy is in public/models/props
 asset_originals/sketchfab/underwood_no._5_typewriter__vintage_3d_prop.glb
+.env
+.env.*

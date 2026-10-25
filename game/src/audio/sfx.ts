@@ -290,3 +290,6 @@ export function setMuted(m: boolean): void {
 export function getAudioSettings(): { master: number; sfx: number; ambience: number; muted: boolean } {
   return { master: vol.master, sfx: vol.sfx, ambience: vol.ambience, muted };
 }
+
+/** Loudness for spoken lines (HTMLAudio): the master volume, or 0 when muted. */
+export const voiceLevel = (): number => (muted ? 0 : vol.master);

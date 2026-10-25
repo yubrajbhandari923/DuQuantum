@@ -22,6 +22,9 @@ export function waiting(s: { collected: string[]; completed: number[] }) {
   return out;
 }
 
+/** What the reticle is on: 'monitor' | 'desk' | a FETCH component id | null. Lab's Rig writes it only when it changes. */
+export const useAim = create<{ aimed: string | null; set: (n: string | null) => void }>((set) => ({ aimed: null, set: (aimed) => set({ aimed }) }));
+
 /** One short HUD notice (Hub renders it). `key` changes on every new message so the fade restarts. */
 export const useToast = create<{ msg: string; sub: string; key: number }>(() => ({ msg: '', sub: '', key: 0 }));
 const toast = (msg: string, sub = '') => useToast.setState((s) => ({ msg, sub, key: s.key + 1 }));
@@ -68,11 +71,13 @@ const halo = (() => {
 })();
 const haloMat = new THREE.SpriteMaterial({ map: halo, color: '#ffc27a', transparent: true, opacity: 0.5, blending: THREE.AdditiveBlending, depthWrite: false, toneMapped: false });
 const poolMat = new THREE.MeshBasicMaterial({ map: halo, color: '#ffb066', transparent: true, opacity: 0.5, blending: THREE.AdditiveBlending, depthWrite: false, toneMapped: false });
+const aimMat = haloMat.clone(); aimMat.color.set('#fff0c8'); aimMat.opacity = 0.95; // the brighter halo of the part under the reticle
 
 function Pickup({ id, level, i }: { id: string; level: number; i: number }) {
   const bob = useRef<THREE.Group>(null);
   const [x, y, z] = SPOTS[id];
   const u = useMemo(() => ({ aim: id }), [id]);
+  const on = useAim((s) => s.aimed === id);
   useFrame(({ clock }) => {
     const t = clock.elapsedTime + i * 1.7;
     if (bob.current) { bob.current.position.y = 0.1 + Math.sin(t * 1.6) * 0.025; bob.current.rotation.y = t * 0.45; }
@@ -81,8 +86,8 @@ function Pickup({ id, level, i }: { id: string; level: number; i: number }) {
     <group position={[x, y, z]} userData={u}>
       <mesh material={poolMat} rotation-x={-Math.PI / 2} position-y={0.004}><circleGeometry args={[0.22, 24]} /></mesh>
       <group ref={bob}>
-        <group scale={PICK_SCALE}><ComponentModel id={id} /></group>
-        <sprite material={haloMat} scale={0.75} position-y={0.08} renderOrder={2} />
+        <group scale={PICK_SCALE * (on ? 1.15 : 1)}><ComponentModel id={id} /></group>
+        <sprite material={on ? aimMat : haloMat} scale={on ? 0.95 : 0.75} position-y={0.08} renderOrder={2} />
         <group position={[0.17, 0.06, 0.06]} rotation-z={0.25}>
           <mesh material={tagStringMat} position-y={0.035}><cylinderGeometry args={[0.0015, 0.0015, 0.07, 4]} /></mesh>
           <mesh position-y={-0.012}><boxGeometry args={[0.07, 0.035, 0.003]} /><meshStandardMaterial map={tagMaterial(level)} metalness={0.7} roughness={0.35} /></mesh>

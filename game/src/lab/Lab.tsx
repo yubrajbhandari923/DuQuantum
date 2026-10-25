@@ -1,33 +1,30 @@
-import { useEffect, useMemo, useRef } from 'react';
+import { Suspense, useEffect, useMemo, useRef, type RefObject } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
-import { create } from 'zustand';
 import { LEVEL_COUNT, hasSet, nextLevel, useGame } from '../store';
 import { play } from '../audio/sfx';
-import { Suspense } from 'react';
 import { Room } from './Scenery';
 import { Chamber } from './Chamber';
 import { CHARACTERS, Characters } from './Characters';
 import { BODY, COLLIDERS, DESK, EYE, SPAWN, SPOTS, WALL } from './layout';
 import { Desk } from './Desk';
-import { Pickups, collect, waiting } from './Pickups';
+import { Pickups, collect, useAim, waiting } from './Pickups';
 import { Intro3D } from './Intro3D';
 
-/** What the reticle is on: 'monitor' | 'desk' | a FETCH component id | null. Only written when it changes. */
-export const useAim = create<{ aimed: string | null; set: (n: string | null) => void }>((set) => ({ aimed: null, set: (aimed) => set({ aimed }) }));
-
 const CHAMBER = 1.7;
-const MON = new THREE.Vector3(...DESK.monitor), VIEW = new THREE.Vector3(...DESK.view);
+const MON = new THREE.Vector3(...DESK.monitor), VIEW = new THREE.Vector3(...DESK.view), CENTRE = new THREE.Vector2();
 
-/** Monitor / desk: power on the current experiment if its parts are all on the desk. */
+/** Monitor / desk: power on the current experiment if its parts are all on the desk; after the tenth, open the box. */
 export function powerOn() {
   const g = useGame.getState(), cur = nextLevel(g.completed);
   if (!hasSet(g.collected, g.completed, cur)) { play('fail'); return false; }
-  document.exitPointerLock(); play('connect'); g.openLevel(cur); return true;
+  document.exitPointerLock(); play('connect');
+  if (g.completed.length >= LEVEL_COUNT) g.go('ending'); else g.openLevel(cur);
+  return true;
 }
 
 /** Walks the player and eases the camera between the menu orbit, the hub and the bench close-up. */
-function Rig() {
+function Rig({ targets }: { targets: RefObject<THREE.Group> }) {
   const { camera, gl, raycaster, scene } = useThree();
   const keys = useRef(new Set<string>());
   const look = useRef({ yaw: SPAWN.yaw, pitch: -0.08 });
@@ -37,11 +34,12 @@ function Rig() {
   const aimedRef = useRef<string | null>(null);
 
   const aim = () => {
-    raycaster.setFromCamera(new THREE.Vector2(0, 0), camera);
-    for (const h of raycaster.intersectObjects(scene.children, true)) {
+    raycaster.setFromCamera(CENTRE, camera);
+    if (!targets.current) return null;
+    for (const h of raycaster.intersectObjects(targets.current.children, true)) {
       let o: THREE.Object3D | null = h.object;
       while (o && o.userData.aim === undefined) o = o.parent;
-      if (o) return h.distance < 3.4 ? (o.userData.aim as string) : null; // un-tagged hits (glass, walls) never block the aim
+      if (o) return h.distance < 3.4 ? (o.userData.aim as string) : null; // only the desk and the parts are cast against: the room never blocks the aim
     }
     return null;
   };
@@ -72,7 +70,7 @@ function Rig() {
       if (document.pointerLockElement !== el) el.requestPointerLock();
       else activate();
     };
-    if ((import.meta as unknown as { env: { DEV: boolean } }).env.DEV) { // test hook: stand `d` metres from console n (1-based), facing it
+    if ((import.meta as unknown as { env: { DEV: boolean } }).env.DEV) { // dev test hook
       (window as unknown as Record<string, unknown>).__lab = { // stand(): in front of the desk; stand(id): beside a waiting component
         stand: (id?: string, d = 1.5) => {
           const [x, y, z] = id && SPOTS[id] ? SPOTS[id] : DESK.monitor, r = Math.hypot(x, z);
@@ -81,7 +79,7 @@ function Rig() {
         },
         collect, waiting: () => waiting(useGame.getState()), powerOn,
         view: (x: number, z: number, yaw: number, pitch = -0.05) => { pos.current.set(x, EYE, z); look.current = { yaw, pitch }; },
-        aimed: () => useAim.getState().aimed, game: useGame, renderer: gl,
+        aimed: () => useAim.getState().aimed, game: useGame, renderer: gl, scene,
       };
     }
     addEventListener('keydown', down); addEventListener('keyup', up); addEventListener('mousemove', move); el.addEventListener('click', click);
@@ -150,6 +148,7 @@ function Rig() {
 
 export function Lab({ quality }: { quality: 'low' | 'high' }) {
   const completed = useGame((s) => s.completed);
+  const targets = useRef<THREE.Group>(null);
   return (
     <>
       <color attach="background" args={['#0d0907']} />
@@ -157,12 +156,14 @@ export function Lab({ quality }: { quality: 'low' | 'high' }) {
       <ambientLight intensity={0.08} color="#ffe2c0" />
       <hemisphereLight args={['#ffd8a8', '#24170e', 0.16]} />
       <Suspense fallback={null}><Room wall={WALL} chamber={CHAMBER} quality={quality} /></Suspense>
-      <Suspense fallback={null}><Desk /></Suspense>
-      <Pickups />
+      <group ref={targets}>
+        <Suspense fallback={null}><Desk /></Suspense>
+        <Pickups />
+      </group>
       <Characters />
       <Chamber open={completed.length >= LEVEL_COUNT} radius={CHAMBER} quality={quality} />
       <Intro3D />
-      <Rig />
+      <Rig targets={targets} />
     </>
   );
 }

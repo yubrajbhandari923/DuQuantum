@@ -3,6 +3,7 @@ import { LINES, intro, useIntro } from '../lab/Intro3D';
 import { speaker } from '../lab/Characters';
 import { Portrait } from './Portrait';
 import { play } from '../audio/sfx';
+import { speak, stopSpeaking } from '../audio/voice';
 
 const NAMES = { heisenberg: 'Heisenberg', schrodinger: 'Schrödinger', player: 'You', narrator: '' } as const;
 const reduced = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -20,9 +21,10 @@ export function Cutscene() {
     const id = setInterval(() => setShown((s) => (s >= full ? s : s + 1)), 22);
     return () => clearInterval(id);
   }, [l]);
-  useEffect(() => () => { speaker.who = null; }, []);
+  useEffect(() => { if (l && l.who !== 'player') speak(l.who, l.text); }, [l]);
+  useEffect(() => () => { speaker.who = null; stopSpeaking(); }, []);
 
-  const skip = () => { play('click'); intro.skip = true; };
+  const skip = () => { play('click'); stopSpeaking(); intro.skip = true; };
   const next = () => { // jump to the next caption (or the end)
     if (l && shown < l.text.length) return setShown(l.text.length);
     const n = LINES[line + 1];
