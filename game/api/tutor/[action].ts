@@ -1,5 +1,5 @@
 // Vercel function for /api/tutor/chat, /tts and /stt. API keys stay in Vercel's environment.
-import { chat, stt, tts, VOICES } from '../../server/handlers';
+import { chat, stt, tts, VOICES } from '../../server/handlers.js';
 
 const PAGES_ORIGIN = 'https://yubrajbhandari923.github.io';
 
