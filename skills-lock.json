@@ -1,0 +1,35 @@
+{
+  "version": 1,
+  "skills": {
+    "threejs-animation": {
+      "source": "cesartevisual/threejs-skills",
+      "sourceType": "github",
+      "skillPath": "skills/threejs-animation/SKILL.md",
+      "computedHash": "92fb25d1bc77b8b82b6e63ebe2135e0644db08df974e3ae68327b702b1e5847b"
+    },
+    "threejs-interaction": {
+      "source": "cesartevisual/threejs-skills",
+      "sourceType": "github",
+      "skillPath": "skills/threejs-interaction/SKILL.md",
+      "computedHash": "50cb85dbb2de8da0e4f0b5e832a172658ce2d15170035866f1905cc916686c59"
+    },
+    "threejs-performance": {
+      "source": "cesartevisual/threejs-skills",
+      "sourceType": "github",
+      "skillPath": "skills/threejs-performance/SKILL.md",
+      "computedHash": "affa549534f18bd2f498ea3073f107e1127c4673c3b49171f33c9dfc5291baea"
+    },
+    "threejs-r3f": {
+      "source": "cesartevisual/threejs-skills",
+      "sourceType": "github",
+      "skillPath": "skills/threejs-r3f/SKILL.md",
+      "computedHash": "fb668b83389e0d18c209b8dd937422d5714543edaf760db792344c71cbcea9b7"
+    },
+    "vercel-react-best-practices": {
+      "source": "vercel-labs/agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/react-best-practices/SKILL.md",
+      "computedHash": "3219a1944e404ffc14d1d9d6aef6dd2e3855b81387ee0a044ccbfe14d34c2357"
+    }
+  }
+}
