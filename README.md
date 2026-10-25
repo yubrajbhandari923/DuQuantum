@@ -178,6 +178,53 @@ Both variants need a resonant memory drive, the port of the Task 2.3 readout dri
 
 Held on after the cat forms, the drive would tilt the wells and, above $\epsilon_c = 2\kappa_2\alpha^3/(3\sqrt3) = 2\pi \times 3.193$ MHz in the static mean field, remove the $-\alpha$ well. The short in-pump pulse instead costs ringing, which grows with the pulse (12 MHz over 0.1 µs reaches 16.0 photons and keeps the code-space population below 0.99 until 0.875 µs), but no time, since with the best setting that population stays above 0.99 from 0.425 µs, against 0.865 µs undriven. The displacement needs the pump and the buffer drive off while it acts, 0.0557 µs to reach $\beta = \alpha$ with the same 12 MHz $\sin^2$ envelope, after which the memory is already in the code space.
 
+## Task 2.1: Extracting the bit-flip rate $\Gamma_X$
+
+We start in $|\alpha\rangle|0\rangle$ with $\epsilon_d = \alpha^2 g_2$ for each $\alpha$. Both $|\pm\alpha\rangle|0\rangle$ are exact dark states of $H_{2\mathrm{ph}}$ and of the buffer loss, so only $\kappa_a$ moves the state, and a bit flip shows up as a slow decay of $\mathrm{Re}\langle a\rangle$. The model is unchanged under $a \to -a$, so the Lindbladian $\mathcal L$ never mixes the elements $\rho_{(n_a n_b),(m_a m_b)}$ with $n_a - m_a$ odd into those with $n_a - m_a$ even. $\langle a\rangle$ sees only the odd sector, and after a short transient
+
+$$\mathrm{Re}\langle a\rangle(t) = A\,e^{-\Gamma_X t}, \qquad \Gamma_X = -\lambda_1,$$
+
+where $\lambda_1$ is the eigenvalue of $\mathcal L$ in the odd sector closest to zero. We get $\Gamma_X$ in two independent ways: a log-linear fit of $\mathrm{Re}\langle a\rangle(t)$ from `mesolve`, and $\lambda_1$ from sparse shift-invert (`scipy.sparse.linalg.eigs` at $\sigma = 0$) on the odd block of $\mathcal L$. Our sparse $\mathcal L$ matches `dq.slindbladian` to $7 \times 10^{-15}$ at $N_a = 6$, $N_b = 3$.
+
+A bit flip is a rare event, so $\Gamma_X$ needs more levels than the photon number does. For each $\alpha$ we computed $\lambda_1$ for $N_a$ up to 28 at $N_b = 10$ and $N_b$ up to 10 at $N_a = 28$ (from $\alpha = 1.8$, $N_a$ up to 32 and $N_b$ up to 12) and use the cheapest truncation within $10^{-3}$ of the largest. The buffer adds to the cost: $N_b = 3$ is enough at $\alpha = 1.0$, but $\alpha = 1.4$ needs $N_b = 5$ and $\alpha = 2.1$ needs $N_b = 12$. When the memory amplitude passes through zero, the buffer is driven to $|\langle b\rangle|^2 = (2\epsilon_d/\kappa_b)^2$, which is 1.32 photons at $\alpha = 1.4$ and 6.70 at $\alpha = 2.1$, so this growth is consistent with a flip path through $a \approx 0$.
+
+The time-domain runs use $\alpha = 0.8, 1.0, 1.2, 1.4$ and run to $T \ge 2.04\,T_X$, saved at 1251 times (250 in the first 50 µs, 1001 after). The fit window is $[10/\lambda_2, T]$, where $\lambda_2$ is the next odd-sector eigenvalue.
+
+| $\alpha$ | $N_a$, $N_b$ | $T$ (µs) | Window (µs) | $n$ | $\Gamma_X$ fit (µs$^{-1}$) | $-\lambda_1$ (µs$^{-1}$) | $T_X$ (µs) |
+|---|---|---|---|---|---|---|---|
+| 0.8 | 10, 3 | 500 | 124.1 to 500 | 836 | $6.423008 \times 10^{-3}$ | $6.423008 \times 10^{-3}$ | 155.7 |
+| 1.0 | 12, 3 | 1000 | 84.5 to 1000 | 964 | $2.302170 \times 10^{-3}$ | $2.302170 \times 10^{-3}$ | 434.4 |
+| 1.2 | 14, 4 | 3500 | 59.5 to 3500 | 998 | $5.998146 \times 10^{-4}$ | $5.998146 \times 10^{-4}$ | 1667.2 |
+| 1.4 | 16, 5 | 17000 | 43.8 to 17000 | 1031 | $1.202763 \times 10^{-4}$ | $1.202763 \times 10^{-4}$ | 8314.2 |
+
+The fit and the eigenvalue agree to $1.1 \times 10^{-11}$ (relative) at every $\alpha$. The local rate $-d\ln\mathrm{Re}\langle a\rangle/dt$ settles on $-\lambda_1$ within a few µs, so the transient is the fast confinement; the slower second mode, $\lambda_2 = 0.0806$ to $0.2283\ \mu\mathrm{s}^{-1}$, is never excited: $H$ and the jumps are real in the Fock basis and $\rho(0)$ is real and symmetric, so $\rho(t)$ stays symmetric, while the $\lambda_2$ mode, $|\mathcal C_+\rangle\langle\mathcal C_-| - |\mathcal C_-\rangle\langle\mathcal C_+|$, is antisymmetric. The window start $10/\lambda_2$ is therefore conservative. Moving it by a factor of 2 either way, or ending the window at $T/2$, changes $\Gamma_X$ by at most $1.7 \times 10^{-14}$ (relative). At all saved times the top two memory levels hold at most $4.6 \times 10^{-7}$ and the top buffer level $8.4 \times 10^{-7}$, and a rerun at $(N_a + 4, N_b + 2)$ over $T/2$ moves the fitted $\Gamma_X$ by at most $6.6 \times 10^{-4}$ (relative). The seven-digit values in the table are at the listed truncation, so they carry this $6.6 \times 10^{-4}$ uncertainty.
+
+![2.1 decay of Re a](plots/task2_1_re_a.png)
+
+![2.1 local decay rate](plots/task2_1_local_rate.png)
+
+![2.1 truncation check](plots/task2_1_truncation.png)
+
+The log-linear fit $\ln\Gamma_X = c - \gamma\alpha^2$ over the four time-domain points gives $\gamma = 3.022 \pm 0.036$ ($n = 4$), and the eigenvalues give the same. This is well above the deck's $\gamma \lesssim 2$, and the two-mode physics below explains the difference.
+
+The naive golden-rule estimate takes a perturbation $V$ between the two wells, $\langle -\alpha|V|\alpha\rangle \propto \langle -\alpha|\alpha\rangle = e^{-2\alpha^2}$, and a rate $\propto |\langle -\alpha|V|\alpha\rangle|^2 \propto e^{-4\alpha^2}$, so $\gamma = 4$. Projecting the loss onto the cat basis makes this concrete. The jump $a$ maps $|\mathcal C_\pm\rangle$ into $|\mathcal C_\mp\rangle$ with amplitudes $\alpha\sqrt{\tanh\alpha^2}$ and $\alpha\sqrt{\coth\alpha^2}$, so the even and odd cats lose photons at slightly different rates, and the symmetric coherence $|\mathcal C_+\rangle\langle\mathcal C_-| + |\mathcal C_-\rangle\langle\mathcal C_+|$, which carries $\mathrm{Re}\langle a\rangle$, decays at
+
+$$\Gamma_X^{(1)} = \kappa_a\alpha^2\left(\coth 2\alpha^2 - 1\right) \approx 2\kappa_a\alpha^2 e^{-4\alpha^2} .$$
+
+Exactly, $\Gamma_X^{(1)} = 2\kappa_a|\langle -|a|+\rangle|^2$ with the orthogonalized wells $|\pm\rangle = (|\mathcal C_+\rangle \pm |\mathcal C_-\rangle)/\sqrt2$ and $\langle -|a|+\rangle = \tfrac{\alpha}{2}\left(\sqrt{\coth\alpha^2} - \sqrt{\tanh\alpha^2}\right) \approx \alpha e^{-2\alpha^2}$, the golden-rule form with the jump operator's matrix element between the wells. The same projection gives $\kappa_a\alpha^2(\coth 2\alpha^2 + 1)$ for the antisymmetric coherence, 0.0811 against $\lambda_2 = 0.0806$ at $\alpha = 0.8$ and 0.2292 against 0.2283 at $\alpha = 1.4$. The exponent of $\Gamma_X^{(1)}$ is 4 only asymptotically: the $\alpha^2$ prefactor lowers the local slope to about $4 - 1/\alpha^2$, and over our four points $\Gamma_X^{(1)}$ alone gives $\gamma = 3.220 \pm 0.073$.
+
+The full model contains this process and one more. Writing $\Gamma_X(\kappa_a) = A\kappa_a + B\kappa_a^2 + \dots$, the part linear in $\kappa_a$ is $2\Gamma_X(\kappa_a) - \Gamma_X(2\kappa_a)/2$, which we get from one more eigenvalue at $2\kappa_a$. It equals $\Gamma_X^{(1)}$ within 0.5% for $0.6 \le \alpha \le 1.4$, as it must, since to first order in $\kappa_a$ only the projection of the loss onto the code space acts; the 0.4% left at $\alpha = 1.4$ is the $\kappa_a^3$ term that the two-point split keeps. The remainder, quadratic in $\kappa_a$, is 2.4% of $\Gamma_X$ at $\alpha = 0.8$ and 25% at $\alpha = 1.4$, and it falls off much more slowly, with a local exponent that rises from 1.31 between $\alpha = 1.0$ and 1.2 to 1.82 between 2.0 and 2.1. It pulls the fitted $\gamma$ from 3.22 down to 3.02. Beyond $\alpha \approx 1.6$ it dominates: $\Gamma_X(2\kappa_a)/\Gamma_X(\kappa_a)$ goes from 2.048 at $\alpha = 0.8$ to 3.626 at $\alpha = 1.8$ and 4.069 at $\alpha = 2.1$, close to the value 4 of a purely quadratic rate (the $2\kappa_a$ eigenvalues at $\alpha = 2.0$ and 2.1 have no larger-truncation check, so the ratio at 2.1 and the remainder exponent between 2.0 and 2.1 are indicative). The local exponent of $\Gamma_X$ therefore peaks at 3.09 near $\alpha^2 = 1.7$ and falls to 1.92 between $\alpha = 2.0$ and 2.1, where $\Gamma_X = 3.849 \times 10^{-7}$ µs$^{-1}$ ($T_X = 2.6$ s, converged in $N_a$ and $N_b$ to $4 \times 10^{-4}$). The deck's $\gamma \lesssim 2$ describes this regime near the operating point, not the small-$\alpha$ range the simulation can reach in the time domain.
+
+The remainder is where the two-mode model differs from the memory-only model of Task 1.0(c). With the same $\kappa_2$, the memory-only $\Gamma_X$ is 11% lower at $\alpha = 1.4$ and 49% lower at $\alpha = 1.8$, and its fit over the four points gives $\gamma = 3.106 \pm 0.056$. The finite buffer bandwidth ($g_2/\kappa_b = 0.29$, $\epsilon_d/\kappa_b$ up to 1.29) strengthens the second-order channel, whose rate falls off slowly with $\alpha$, and only this channel needs the extra buffer levels, since the first-order part lives in the code space.
+
+Thermal photons in the memory bath, with jumps $\sqrt{\kappa_a(1+n_{\mathrm{th}})}\,a$ and $\sqrt{\kappa_a n_{\mathrm{th}}}\,a^\dagger$, lower $\gamma$ already at small $\alpha$: over the same four points $\gamma = 2.749 \pm 0.023$ at $n_{\mathrm{th}} = 0.01$ and $2.019 \pm 0.056$ at $n_{\mathrm{th}} = 0.1$. Either effect, thermal population or larger $\alpha$, brings the exponent down to the deck's value; at $n_{\mathrm{th}} = 0$ and $\alpha \le 1.4$, $\gamma = 3.02$.
+
+![2.1 bit-flip rate](plots/task2_1_gamma_x.png)
+
+![2.1 local exponent](plots/task2_1_local_exponent.png)
+
+The eigenvalues come from `scripts/task2_1_bit_flip.py eig` and `extra` (Slurm arrays `slurm/task2_1_eig.sh` and `slurm/task2_1_extra.sh`; the largest solves, $28 \times 14$ at $\alpha = 2.0$ and 2.1, took 4442 s and 4530 s), the time-domain runs from `time` (`slurm/task2_1_time.sh`; the longest, $\alpha = 1.4$ at $20 \times 7$ over 8500 µs, took 5540 s in its final job), and `analyze` makes the fits, tables and plots from the caches in under a minute.
+
 ## Task 2.2: Extracting the phase-flip rate $\Gamma_Z$
 
 Only $\kappa_a$ breaks the memory parity, and since $Pa = -aP$ the master equation gives exactly $d\langle P\rangle/dt = -2\kappa_a\langle a^\dagger a P\rangle$. In the cat manifold $a|\mathcal C_\pm\rangle = \alpha(\mathcal N_\mp/\mathcal N_\pm)|\mathcal C_\mp\rangle$, so photon loss takes $\mathcal C_+$ to $\mathcal C_-$ at rate $\kappa_a n_e$ and back at rate $\kappa_a n_o$, where $n_e = \alpha^2\tanh\alpha^2$ and $n_o = \alpha^2\coth\alpha^2$ are the photon numbers of the two cats. The parity therefore relaxes as
