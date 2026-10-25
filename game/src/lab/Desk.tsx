@@ -7,7 +7,7 @@ import { LEVELS } from '../story/content';
 import { FETCH } from '../story/barks';
 import { M } from '../instruments/parts3d';
 import { DESK, SPOTS } from './layout';
-import { ComponentModel, walnut } from './Components';
+import { ComponentModel, Prop, walnut } from './Components';
 import { PICK_SCALE, flying, roman, waiting } from './Pickups';
 import { W as PW, drawPreview } from './screens';
 import { Piece } from './Scenery';
@@ -21,8 +21,6 @@ const PART_S = 0.13; // parts in the case
 
 const leather = new THREE.MeshStandardMaterial({ color: '#1f3a2a', roughness: 0.62, metalness: 0 });
 const felt = new THREE.MeshStandardMaterial({ color: '#3a1418', roughness: 1 });
-const shade = new THREE.MeshStandardMaterial({ color: '#1f6b3a', emissive: '#2f8a4a', emissiveIntensity: 0.45, roughness: 0.15, metalness: 0.1, side: THREE.DoubleSide });
-const bulb = new THREE.MeshBasicMaterial({ color: '#fff1c8', toneMapped: false });
 const paper = new THREE.MeshStandardMaterial({ color: '#e6dcc0', roughness: 0.9 });
 const BOOK = ['#5a1a16', '#1d2a44', '#3b4a22', '#6b4a1e', '#2a1a12'].map((c) => new THREE.MeshStandardMaterial({ color: c, roughness: 0.8 }));
 
@@ -174,17 +172,9 @@ function Scope() {
 
 function BankersLamp() {
   return (
-    <group position={[-1.02, TOP, -0.16]} rotation-y={0.25}>
-      <mesh material={M.gold} position-y={0.015} castShadow><cylinderGeometry args={[0.1, 0.11, 0.03, 32]} /></mesh>
-      <mesh material={M.gold} position-y={0.2}><cylinderGeometry args={[0.012, 0.014, 0.36, 12]} /></mesh>
-      <mesh material={M.gold} position={[0, 0.38, 0.04]} rotation-x={Math.PI / 2}><cylinderGeometry args={[0.01, 0.01, 0.1, 8]} /></mesh>
-      <group position={[0, 0.4, 0.08]} rotation-z={Math.PI / 2}>
-        <mesh material={shade} castShadow><cylinderGeometry args={[0.1, 0.1, 0.36, 24, 1, true, 0, Math.PI]} /></mesh>
-        {[-1, 1].map((s) => <mesh key={s} material={M.gold} position-y={s * 0.18}><cylinderGeometry args={[0.1, 0.1, 0.006, 24, 1, false, 0, Math.PI]} /></mesh>)}
-      </group>
-      <mesh material={bulb} position={[0, 0.36, 0.08]}><sphereGeometry args={[0.025, 12, 8]} /></mesh>
-      <mesh material={M.gold} position={[0.06, 0.3, 0.16]}><cylinderGeometry args={[0.002, 0.002, 0.12, 4]} /></mesh>
-      <pointLight position={[0, 0.3, 0.12]} color="#ffcf8a" intensity={1.8} distance={2.6} decay={2} castShadow={false} />
+    <group position={[-1.0, TOP, -0.14]} rotation-y={0.3}>
+      <Prop model="desk-lamp" scale={1.1} />
+      <pointLight position={[0, 0.36, 0.06]} color="#ffcf8a" intensity={1.8} distance={2.6} decay={2} />
     </group>
   );
 }
@@ -256,7 +246,7 @@ function Riser({ x, wood }: { x: number; wood: THREE.Material }) {
       {[0, 1, 2, 3, 4].map((k) => <mesh key={k} material={BOOK[k]} position={[0.01 + k * 0.035 - 0.07, 0.13, 0.06]} rotation-z={k === 4 ? 0.2 : 0}>{box(0.03, 0.22 - (k % 2) * 0.03, 0.1)}</mesh>)}
       <mesh material={M.gold} position={[0.22, 0.06, 0.07]}><cylinderGeometry args={[0.035, 0.04, 0.06, 16]} /></mesh>
       <mesh material={M.gold} position-y={0.36}>{box(0.74, 0.012, 0.24)}</mesh>
-      {[0, 1, 2].map((k) => <mesh key={k} material={BOOK[(k + 2) % 5]} position={[-0.2 + k * 0.05, 0.47, 0]} rotation-z={k === 2 ? -0.25 : 0}>{box(0.04, 0.2, 0.16)}</mesh>)}
+      <Prop model="book-stack" position={[0.12, 0.366, 0]} rotation-y={x < 0 ? 0.4 : -0.3} scale={0.85} />
     </group>
   );
 }

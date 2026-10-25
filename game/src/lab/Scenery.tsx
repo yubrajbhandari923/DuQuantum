@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
 import { ContactShadows, Environment, Instance, Instances, Sparkles, useGLTF, useProgress } from '@react-three/drei';
 import * as THREE from 'three';
+import { Prop } from './Components';
 import { APO, PANEL, SIDES, STEP, faceIn, gap, onPanel, polar } from './layout';
 import { DoorSwing } from './Door';
 
@@ -63,6 +64,18 @@ function Fire() {
   const l = useRef<THREE.PointLight>(null);
   useFrame(({ clock }) => { const t = clock.elapsedTime; if (l.current) l.current.intensity = 5 + Math.sin(t * 7) * 0.8 + Math.sin(t * 13.3) * 0.6; });
   return <pointLight ref={l} position={[0, 0.5, 0.9]} color="#ff8a3c" distance={6} decay={1.8} />;
+}
+
+/** A small blue Bunsen flame: two additive cones that flicker. */
+function Flame(props: JSX.IntrinsicElements['group']) {
+  const g = useRef<THREE.Group>(null);
+  useFrame(({ clock }) => { if (g.current) g.current.scale.y = 1 + Math.sin(clock.elapsedTime * 23) * 0.08 + Math.sin(clock.elapsedTime * 9) * 0.06; });
+  return (
+    <group ref={g} {...props}>
+      <mesh position-y={0.04}><coneGeometry args={[0.012, 0.08, 12, 1, true]} /><meshBasicMaterial color="#5a8cff" transparent opacity={0.55} blending={THREE.AdditiveBlending} depthWrite={false} toneMapped={false} /></mesh>
+      <mesh position-y={0.025}><coneGeometry args={[0.007, 0.05, 10, 1, true]} /><meshBasicMaterial color="#bfe0ff" transparent opacity={0.7} blending={THREE.AdditiveBlending} depthWrite={false} toneMapped={false} /></mesh>
+    </group>
+  );
 }
 
 /** Period glassware from the low-poly lab set, authored at roughly 15x scale. */
@@ -169,11 +182,11 @@ const PANELS: Record<number, JSX.Element> = {
   5: <><Model url="/models/vintage/lab_cabinet.glb" position={[-0.65, 0, 0.25]} /><Model url="/models/vintage/lab_cabinet.glb" position={[0.65, 0, 0.25]} />
     <Glass n="tubes" position={[-0.6, 1.8, 0.25]} /><Glass n="beaker" position={[0.7, 1.8, 0.25]} />
     <Glass n="smallBeaker" position={[-0.8, 0.98, 0.3]} /><Glass n="flask" position={[-0.45, 0.98, 0.3]} scale={0.18} /><Glass n="beaker" position={[0.6, 1.36, 0.3]} /><Glass n="tubes" position={[0.75, 0.6, 0.3]} /></>,
-  6: <><Piece n="table" position={[0, 0, 0.55]} scale={0.78} /><Piece n="vase" position={[-0.4, 0.72, 0.5]} /><Piece n="tablelamp" position={[0.45, 0.72, 0.45]} />
+  6: <><Piece n="table" position={[0, 0, 0.55]} scale={0.78} /><Prop model="typewriter-underwood" position={[-0.35, 0.72, 0.55]} rotation-y={0.25} /><Piece n="tablelamp" position={[0.45, 0.72, 0.45]} />
     <Piece n="chair" position={[0.35, 0, 1.2]} rotation-y={Math.PI + 0.3} /><Piece n="paintC" position={[0, 2.1, 0.03]} /></>,
   7: <Window />,
   8: <><Piece n="table" position={[0, 0, 0.55]} scale={0.78} /><Glass n="tubes" position={[-0.6, 0.72, 0.5]} rotation-y={0.4} /><Glass n="beaker" position={[-0.1, 0.72, 0.45]} />
-    <Glass n="smallBeaker" position={[0.3, 0.72, 0.65]} /><Glass n="flask" position={[0.7, 0.72, 0.45]} scale={0.18} /><Piece n="paintB" position={[0, 2.0, 0.03]} /></>,
+    <Glass n="smallBeaker" position={[0.3, 0.72, 0.65]} /><Glass n="flask" position={[0.7, 0.72, 0.45]} scale={0.18} /><Prop model="paintings-pack" position={[0, 1.35, 0.03]} scale={0.9} /><Prop model="bunsen-burner" position={[-0.25, 0.72, 0.35]} /><Flame position={[-0.25, 0.97, 0.35]} /></>,
   9: <Door />,
 };
 

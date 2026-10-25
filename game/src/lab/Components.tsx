@@ -1,17 +1,37 @@
-import { useMemo } from 'react';
+import { Suspense, useMemo } from 'react';
+import { useGLTF } from '@react-three/drei';
 import * as THREE from 'three';
 import { M, PartModel, glow } from '../instruments/parts3d';
 import type { Glyph } from '../instruments/CircuitBench';
 
 /** Collectible apparatus, one model per FETCH id. Same scale and frame as PartModel: ~0.9 x 0.5 footprint, on y = 0, front +z. */
-type Kind = Glyph | 'toroid' | 'lens' | 'valve' | 'knob' | 'case' | 'gauge';
+type Kind = Glyph | 'toroid' | 'valve' | 'knob' | 'case';
 const KIND: Record<string, Kind> = {
   'l1-inductor': 'inductor', 'l1-capacitor': 'capacitor', 'l2-junction': 'junction',
-  'l3-pulse-box': 'pump', 'l3-loss-dial': 'detector', 'l4-drive': 'drive',
-  'l5-cat-coil': 'toroid', 'l5-wigner-lens': 'lens', 'l6-loss-valve': 'valve', 'l6-parity-meter': 'detector',
+  'l3-loss-dial': 'detector',
+  'l5-cat-coil': 'toroid', 'l6-loss-valve': 'valve',
   'l7-pair-dissipator': 'resonator', 'l7-rate-knob': 'knob', 'l8-squid': 'squid', 'l8-pump': 'pump', 'l8-buffer': 'buffer',
-  'l9-fit-kit': 'case', 'l9-bias-gauge': 'gauge', 'l10-detector': 'detector', 'l10-drive': 'drive', 'l10-line': 'line',
+  'l9-fit-kit': 'case', 'l10-detector': 'detector', 'l10-drive': 'drive', 'l10-line': 'line',
 };
+
+/** Real scanned props (public/models/props, metres, origin bottom-centre, front +z) standing in for some components. */
+const PROP: Record<string, string> = {
+  'l3-pulse-box': 'vacuum-tube-instruments', 'l4-drive': 'radio-bush-dac10', 'l5-wigner-lens': 'microscope',
+  'l6-parity-meter': 'voltmeter-rusty', 'l9-bias-gauge': 'voltmeter-rusty',
+};
+export const propUrl = (id: string) => `/models/props/${id}.glb`;
+
+/** One prop at real size (or `fit`: scaled so its larger footprint side is `fit`). Clones share geometry and materials. */
+export function Prop({ model, fit, ...rest }: { model: string; fit?: number } & JSX.IntrinsicElements['group']) {
+  const { scene } = useGLTF(propUrl(model));
+  const { o, s } = useMemo(() => {
+    const o = scene.clone(true);
+    o.traverse((m) => { m.castShadow = true; m.receiveShadow = true; });
+    const size = new THREE.Box3().setFromObject(scene).getSize(new THREE.Vector3());
+    return { o, s: fit ? fit / Math.max(size.x, size.z) : 1 };
+  }, [scene, fit]);
+  return <group {...rest}><primitive object={o} scale={s} /></group>;
+}
 
 const glass = new THREE.MeshPhysicalMaterial({ color: '#e8f0e0', transparent: true, opacity: 0.28, roughness: 0.05, clearcoat: 1, depthWrite: false, side: THREE.DoubleSide });
 export const walnut = new THREE.MeshStandardMaterial({ color: '#4e2c16', roughness: 0.45, metalness: 0 });
@@ -32,15 +52,6 @@ function Model({ kind }: { kind: Kind }) {
         <mesh geometry={toroidGeo} material={M.copper} castShadow />
       </group>
       {[-1, 1].map((s) => <mesh key={s} material={M.gold} position={[s * 0.3, 0.09, 0.12]}><cylinderGeometry args={[0.025, 0.025, 0.06, 12]} /></mesh>)}
-    </>;
-    case 'lens': return <>
-      <mesh material={M.dark} position-y={0.025} castShadow><cylinderGeometry args={[0.2, 0.24, 0.05, 32]} /></mesh>
-      <mesh material={M.gold} position-y={0.14}><cylinderGeometry args={[0.025, 0.03, 0.2, 12]} /></mesh>
-      <group position-y={0.42}>
-        <mesh material={M.gold} castShadow><torusGeometry args={[0.2, 0.03, 12, 40]} /></mesh>
-        <mesh material={glass} rotation-x={Math.PI / 2}><cylinderGeometry args={[0.19, 0.19, 0.02, 40]} /></mesh>
-        <mesh material={M.gold} position-y={-0.22}><boxGeometry args={[0.06, 0.06, 0.06]} /></mesh>
-      </group>
     </>;
     case 'valve': return <>
       <mesh material={M.dark} position-y={0.05} castShadow><cylinderGeometry args={[0.13, 0.14, 0.1, 24]} /></mesh>
@@ -66,20 +77,11 @@ function Model({ kind }: { kind: Kind }) {
       <mesh material={M.face} position={[0, 0.12, 0.233]}><boxGeometry args={[0.26, 0.08, 0.004]} /></mesh>
       <mesh material={M.gold} position={[0, 0.27, 0]}><boxGeometry args={[0.2, 0.025, 0.03]} /></mesh>
     </>;
-    case 'gauge': return <>
-      <mesh material={walnut} position-y={0.05} castShadow><boxGeometry args={[0.6, 0.1, 0.36]} /></mesh>
-      <group position={[0, 0.34, 0]} rotation-x={-0.15}>
-        <mesh material={M.gold} rotation-x={Math.PI / 2} castShadow><cylinderGeometry args={[0.25, 0.25, 0.08, 40]} /></mesh>
-        <mesh material={M.face} position-z={0.041} rotation-x={Math.PI / 2}><cylinderGeometry args={[0.215, 0.215, 0.004, 40]} /></mesh>
-        {ticks.map((a, i) => <mesh key={i} material={M.dark} position={[Math.sin(a) * 0.17, Math.cos(a) * 0.17 - 0.04, 0.045]} rotation-z={-a}><boxGeometry args={[0.006, i % 5 ? 0.025 : 0.045, 0.003]} /></mesh>)}
-        <mesh material={glow('red')} position={[0.03, 0.04, 0.05]} rotation-z={-0.4}><boxGeometry args={[0.007, 0.17, 0.003]} /></mesh>
-        <mesh material={glass} position-z={0.045} rotation-x={Math.PI / 2}><cylinderGeometry args={[0.22, 0.22, 0.004, 40]} /></mesh>
-      </group>
-    </>;
     default: return <PartModel glyph={kind} tone="amber" />;
   }
 }
 
 export function ComponentModel({ id }: { id: string }) {
-  return <Model kind={KIND[id] ?? 'line'} />;
+  return PROP[id] ? <Suspense fallback={null}><Prop model={PROP[id]} fit={0.9} /></Suspense> : <Model kind={KIND[id] ?? 'line'} />;
 }
+for (const p of new Set(Object.values(PROP))) useGLTF.preload(propUrl(p));
