@@ -2,6 +2,8 @@
 \usefonttheme{serif}
 \usepackage{mathptmx}
 \usepackage{booktabs}
+\usepackage{tikz}
+\usetikzlibrary{positioning}
 \graphicspath{{../plots/}{figs/}}
 
 \definecolor{tabblue}{RGB}{31,119,180}
@@ -13,16 +15,17 @@
 \setbeamertemplate{itemize items}[circle]
 \setbeamertemplate{footline}{\hfill\insertframenumber\hspace{1em}\vspace{0.6em}}
 
-\newcommand{\gap}{\setlength{\itemsep}{14pt}}
+\newcommand{\gap}{\setlength{\itemsep}{16pt}}
+\newcommand{\figcap}[1]{\\[0.3em]{\footnotesize\color{gray}#1}}
 
-% bullets left, one figure right
-\newcommand{\figframe}[4][0.80]{%
+% bullets left, one figure right, a grey caption under the figure
+\newcommand{\figframe}[5][0.70]{%
   \begin{frame}{#2}
     \begin{columns}[c]
       \column{0.40\textwidth}
       \begin{itemize}\gap #3\end{itemize}
       \column{0.58\textwidth}
-      \centering\includegraphics[width=\linewidth,height=#1\textheight,keepaspectratio]{#4}
+      \centering\includegraphics[width=\linewidth,height=#1\textheight,keepaspectratio]{#4}\figcap{#5}
     \end{columns}
   \end{frame}}
 
@@ -38,37 +41,83 @@
   \titlepage
 \end{frame}
 
-\figframe[0.62]{The setup}{
-  \item A storage resonator holds the qubit, about 4.4 photons of microwave light
-  \item A pump and a leaky helper resonator keep it in shape; we simulated both together
-}{p01}
-
-\figframe[0.70]{The qubit is a ball in one of two valleys}{
-  \item One valley means 0, the other means 1, and the pump keeps the ball where it is
-  \item Switched on from empty, the pump builds the qubit in about 1 $\mu$s
-}{p05}
-
-\begin{frame}{Bit flips are a million times rarer than phase flips}
-  \vfill
-  \begin{columns}[c]
-    \column{0.30\textwidth}\centering
-    {\Huge\color{tabblue} 2.6 s}\\[0.5em] time to a bit flip
-    \column{0.30\textwidth}\centering
-    {\Huge\color{tabblue} 1.94 $\mu$s}\\[0.5em] time to a phase flip
-    \column{0.30\textwidth}\centering
-    {\Huge\color{tabblue} $10^{6}$}\\[0.5em] how much rarer bit flips are
-  \end{columns}
+\begin{frame}{The problem: quantum computers make mistakes}
   \vfill
   \begin{itemize}\gap
-    \item A bigger cat makes the valleys deeper, so the ball almost never hops
-    \item Only one kind of error is left to correct, which makes error correction cheaper
+    \item A qubit can be 0, 1, or both at once, but tiny disturbances from the outside world keep spoiling it
+    \item It goes wrong in two ways: 0 and 1 swap (a \textbf{bit flip}), or the ``both at once'' gets scrambled (a \textbf{phase flip}). Fixing both kinds takes many extra qubits
   \end{itemize}
   \vfill
 \end{frame}
 
-\figframe[0.70]{Reading the qubit}{
-  \item The helper's output goes up for 0 and down for 1, readable within about 1 $\mu$s
-  \item Best readout error 0.4\%; enlarging the cat while reading cuts it 13 to 18 times
-}{task2_3_b_trace}
+\figframe{The idea: a cat qubit}{
+  \item Store 0 and 1 as a ball resting in one of two valleys, and keep digging the valleys
+  \item Deep valleys mean the ball almost never hops, so bit flips nearly vanish and only phase flips are left to fix
+}{p05}{The two valleys, 0 and 1}
+
+\figframe[0.62]{The device we simulated}{
+  \item A tiny box (the memory) traps microwave light, about 4.4 particles of light (photons). This light is the qubit
+  \item A pump and a leaky helper box add and remove light in pairs, which keeps the two valleys in place
+}{p01}{Memory box, pump, helper box and its output line}
+
+\begin{frame}{How we solved it: we built the device inside a computer}
+  \begin{center}
+  \begin{tikzpicture}[box/.style={draw=tabblue, thick, rounded corners, align=center, minimum height=1.4cm, text width=2.6cm, font=\small}, node distance=0.7cm]
+    \node[box] (a) {The rules of quantum physics for both boxes};
+    \node[box, right=of a] (b) {A computer plays them forward in time};
+    \node[box, right=of b] (c) {Check: a bigger simulation and a second method};
+    \node[box, right=of c, fill=tabblue!10] (d) {Headline numbers};
+    \foreach \x/\y in {a/b, b/c, c/d} \draw[->, thick, tabblue] (\x) -- (\y);
+  \end{tikzpicture}
+  \end{center}
+  \vspace{0.6em}
+  \begin{itemize}\gap
+    \item We simulated the memory and the helper box together, the way they sit on a real chip
+    \item Every number was checked twice, so the results do not depend on simulation shortcuts
+  \end{itemize}
+\end{frame}
+
+\figframe[0.66]{Step 1: the pump turns empty light into a cat}{
+  \item Snapshots of the light in the box: one blob splits into two, the cat that is 0 and 1 at once
+  \item It takes about 1 microsecond, a millionth of a second
+}{task1_1_wigner}{The light in the memory box, from 0 to 3 microseconds}
+
+\figframe[0.66]{Step 2: bigger cats flip much less}{
+  \item Each dot is one simulation. Each step down the scale means 10 times fewer bit flips
+  \item For small cats, every extra photon makes bit flips about 20 times rarer
+}{task2_1_gamma_x}{Bit flips per microsecond against cat size}
+
+\begin{frame}{The big result: bit flips are a million times rarer}
+  \vfill
+  \begin{columns}[c]
+    \column{0.30\textwidth}\centering
+    {\Huge\color{tabblue} 2.6 s}\\[0.5em] average time to a bit flip
+    \column{0.30\textwidth}\centering
+    {\Huge\color{tabblue} 1.94 $\mu$s}\\[0.5em] average time to a phase flip
+    \column{0.30\textwidth}\centering
+    {\Huge\color{tabblue} 1{,}000{,}000$\times$}\\[0.5em] how much rarer bit flips are
+  \end{columns}
+  \vfill
+  \begin{itemize}\gap
+    \item At our working size, a cat of 4.4 photons
+    \item If phase flips happened once a second, bit flips would happen about once every two weeks
+  \end{itemize}
+  \vfill
+\end{frame}
+
+\figframe[0.66]{Step 3: reading the qubit has a sweet spot}{
+  \item A gentle push makes the helper box's signal go up for 0 and down for 1. Read too briefly and the signal is too faint; read too long and the cat may flip while we look
+  \item Best balance: 0.4\% wrong answers. Our trick, making the cat bigger while reading, cuts the mistakes 13 to 18 times
+}{task2_4_fom}{Readout mistakes against reading time, for four push strengths}
+
+\begin{frame}{What we found}
+  \vfill
+  \begin{itemize}\gap
+    \item The cat qubit keeps its bit for seconds: bit flips are a million times rarer than phase flips, so correcting errors gets much cheaper
+    \item It can be read with 0.4\% wrong answers, and 13 to 18 times fewer when the cat is made bigger during the reading
+  \end{itemize}
+  \vfill
+  \centering{\footnotesize\color{gray}Code and every number: github.com/yubrajbhandari923/DuQuantum, branch ak-changes}
+\end{frame}
 
 \end{document}
