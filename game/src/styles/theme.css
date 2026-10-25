@@ -1,0 +1,22 @@
+@import '@fontsource/im-fell-english/400.css';
+@import '@fontsource/im-fell-english/400-italic.css';
+@import '@fontsource/ibm-plex-sans/400.css';
+@import '@fontsource/ibm-plex-sans/500.css';
+@import '@fontsource/ibm-plex-sans/600.css';
+@import '@fontsource/ibm-plex-mono/400.css';
+@import '@fontsource/ibm-plex-mono/500.css';
+
+:root {
+  --bg: #0B1020; --surface: #172033; --surface-2: #1f2a42; --edge: #2c3a58;
+  --cyan: #4DE0DC; --violet: #A78BFA; --amber: #F4B860; --red: #F06B73;
+  --text: #E8ECF4; --muted: #98A4B8;
+  --font-title: 'IM Fell English', Georgia, serif;
+  --font-ui: 'IBM Plex Sans', system-ui, sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, Menlo, monospace;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+}
+html, body, #root { height: 100%; margin: 0; background: var(--bg); color: var(--text); font-family: var(--font-ui); }
+::selection { background: color-mix(in srgb, var(--cyan) 35%, transparent); }
+:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+.num { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+@media (prefers-reduced-motion: reduce) { * { animation-duration: .001ms !important; transition-duration: .001ms !important; } }
