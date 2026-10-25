@@ -298,6 +298,76 @@ From a codeword the buffer holds at most 0.0055 photons, far below its peak duri
 
 ![2.3 truncation check](plots/task2_3_truncation.png)
 
+## Task 2.4 — Open-ended / capstone: Optimizing the readout
+
+### (a) Circuit terms and the effective model
+
+At $\varphi_\Delta = \pi/2$ and $\varphi_\Sigma = -\pi/2 + \epsilon_p\cos\omega_p t$ the ATS term becomes
+
+$$\hat H_{\rm ATS} = 2E_J\sin(\epsilon_p\cos\omega_p t)\,\sin\hat\varphi \approx 2E_J\epsilon_p\cos(\omega_p t)\,\sin\hat\varphi ,$$
+
+up to $\epsilon_p^2/6 = 2.1 \times 10^{-4}$. Its cubic part contains $-\tfrac12\varphi_a^2\varphi_b(\hat a^2\hat b^\dagger + \mathrm{h.c.})$, static in the rotating frame for $\omega_p = 2\omega_a - \omega_b$, so
+
+$$g_2 = \tfrac12 E_J\epsilon_p\varphi_a^2\varphi_b ,$$
+
+and $\epsilon_p = 0.03532$ rad, or 0.03702 rad with the normal-ordering factor $e^{-(\varphi_a^2+\varphi_b^2)/2} = 0.95428$. A monomial survives the rotating-wave step only if $k_a\omega_a + k_b\omega_b = \pm\omega_p$ with $k_a + k_b$ odd, which at 4.0, 4.8 and 3.2 GHz reads $5k_a + 6k_b = \pm 4$. The lowest solution is $(2,-1)$ and the next ones are of order 19 and 25, so only the $\hat a^2\hat b^\dagger$ family is resonant, dressed at fifth order as $g_2(1 - 0.0012\,\hat a^\dagger\hat a - 0.045\,\hat b^\dagger\hat b)$.
+
+Every other term is at least 0.8 GHz off resonance. The largest are linear, as the pump drives the buffer with 404.5 MHz at 1.6 GHz and the memory with 80.9 MHz at 0.8 GHz (displacements 0.303 and 0.112). At second order all of them give Stark shifts of $+0.929$ MHz (memory) and $+23.06$ MHz (buffer), which retuning $\omega_p$ and the drives calibrates away, and $K_a = -4.94$ kHz, $K_b = -2.67$ MHz and $\chi = -199.5$ kHz.
+
+A tone $2\epsilon_Z\cos(\omega_a t)(\hat a + \hat a^\dagger)$ on a memory port gives $\epsilon_Z(\hat a + \hat a^\dagger)$; its counter-rotating part only adds a constant energy offset and a displacement $\epsilon_Z/2\omega_a = 9.5 \times 10^{-6}$ at 0.1 $g_2$. A tone $\epsilon_r\cos\omega_a t$ on $\varphi_\Sigma$ acts through the linear term of $\sin\hat\varphi$, $\epsilon_Z = E_J\epsilon_r\varphi_a e^{-(\varphi_a^2+\varphi_b^2)/2}$, so 0.1 $g_2$ needs $\epsilon_r = 3.3 \times 10^{-5}$ rad, with a $-7.9 \times 10^{-3}$ number dressing in the cat.
+
+We therefore simulate $\hat H_{2\mathrm{ph}} + \epsilon_Z(\hat a + \hat a^\dagger)$ with the jump operators of Task 1. The dropped terms oscillate over 300 times faster than $g_2$, $\kappa_b$ and $\kappa_2$ and act only at second order. $|K_b|$ is comparable to $\kappa_b/2\pi = 2.6$ MHz, but the buffer stays near vacuum except during a flip: adding $K_a$, $K_b$ and $\chi$ at $\alpha = 1.4$ lowers $\Gamma_X$ by 2.5% at $\epsilon_Z = 0$ and 8.9% at 0.1 $g_2$ ($16 \times 5$; $20 \times 7$ agrees to $1.1 \times 10^{-4}$), which changes no conclusion below.
+
+### (b) Contrast and bit-flip rate against $\epsilon_Z$
+
+On the code space the drive acts as $2\alpha\epsilon_Z Z$ and never couples the wells directly, but it pushes both off their dark states by $\delta a \approx -i\epsilon_Z/(2\kappa_2\alpha^2)$ (Task 2.3), and the admixed excited states relax through the buffer, now and then into the other well:
+
+$$\Gamma_X(\epsilon_Z) = \Gamma_X(0) + c(\alpha)\,\epsilon_Z^2 + O(\epsilon_Z^4).$$
+
+The drive mixes the parity sectors, so $\Gamma_X$ is the slowest nonzero eigenvalue of the full Task 2.1 Liouvillian, found by shift-invert at $\sigma = 0.2$ µs$^{-1}$ (at $\sigma = 0$ it returned eigenvalues with positive real part). We use the Task 2.1 truncations at $\alpha = 0.8$ to 1.4; one larger size, up to $20 \times 7$, changes $\Gamma_X$ by at most $3.2 \times 10^{-3}$, and 1.1% at $\alpha = 1.0$, 0.1 $g_2$ ($n = 8$).
+
+The drive-induced part has log slope 2.004 to 2.014 in $\epsilon_Z$ at $\alpha = 0.8$ to 1.4 ($n = 3$ each) and 2.056 at $\alpha = 2.1$ from the Task 2.3 runs ($n = 3$). Setting $\kappa_a = 0$ changes it by at most 1.1% ($n = 12$), so these flips come from the drive and the two-photon dissipation alone. The coefficient $c$ is 0.179, 0.102, 0.0449, 0.0162 and $1.01 \times 10^{-4}$ µs at $\alpha = 0.8$, 1.0, 1.2, 1.4 and 2.1. The local exponent $-d\ln c/d\alpha^2$ rises from 1.57 to 2.07, and a fit gives 1.828 over $\alpha \le 1.4$ ($n = 4$) and 2.007 over all five ($n = 5$), against 3.02 for the undriven rate. At $\alpha = 1.4$ a log-linear fit of $\mathrm{Re}\langle a\rangle$ in 20 µs time runs matches the eigenvalue to five digits ($n = 101$ and 501), and we use that fit below.
+
+![2.4 bit-flip rate under the readout drive; dotted lines are the undriven rates](plots/task2_4_gamma_eps.png)
+
+At $\alpha = 2.1$, 4 µs runs at $24 \times 8$ (801 time points, 24 s each) give the half contrast $(\mathrm{Re}\langle b\rangle_- - \mathrm{Re}\langle b\rangle_+)/2$ within 0.53% of $\epsilon_Z/2\alpha g_2$ up to 1.2 $g_2$ and 1.5% low at 1.6 $g_2$. It then bends to 0.765 of linear at 2.4 $g_2$ and 0.167 at 3.2 $g_2$, while the mean field stays within 0.82% and 3.5%. The bend is switching: $\Gamma_X$ reaches 0.297 and 1.04 µs$^{-1}$ there. A $32 \times 12$ run at 1.6 $g_2$ agrees to $2.3 \times 10^{-4}$ in contrast and 1.3% in rate.
+
+![2.4 contrast and switching rate at alpha = 2.1](plots/task2_4_contrast.png)
+
+The figure of merit is the total error after a window $\tau$, homodyne misassignment (Task 2.3) plus flip probability,
+
+$$P(\tau) = \tfrac12\,\mathrm{erfc}\!\left(\sqrt{2\kappa_b\tau}\,|\mathrm{Re}\langle b\rangle_{\rm ss}|\right) + \tfrac12\left(1 - e^{-\Gamma_X\tau}\right).$$
+
+In the linear regime both terms depend on $\epsilon_Z^2\tau$ alone, so a stronger drive buys speed at no cost: the minimum over $\tau$ is $4.05 \times 10^{-3}$, $3.94 \times 10^{-3}$ and $4.11 \times 10^{-3}$ at 0.05, 0.1 and 0.2 $g_2$ (windows of 1132, 285 and 70.6 µs), 85% of it from flips. Once $c$ grows with the drive the floor rises, to $8.71 \times 10^{-3}$ at 0.8 $g_2$ and $2.44 \times 10^{-2}$ at 1.6 $g_2$. The trade-off is built in. The codeword signal is the buffer resupplying the drive's displacement of the memory off its dark state, and that same displacement opens the path to the other well.
+
+![2.4 figure of merit at alpha = 2.1](plots/task2_4_fom.png)
+
+### (c) Strategy: raise $\alpha$ for the readout
+
+The signal falls only as $1/\alpha$ while $c$ falls about as $e^{-2\alpha^2}$, so the flip probability over a window of fixed misassignment scales as $\alpha^2 c(\alpha)$. We raise $\epsilon_d$ to $\alpha_r^2 g_2$, read out, switch $\epsilon_Z$ off and return to $\alpha = 2.1$; the extra phase flips commute with the $Z$ measurement. At 0.1 $g_2$ the flip probability over the 1% window falls from 0.318 at $\alpha = 0.8$ to 0.111 at 1.4 and $1.72 \times 10^{-3}$ at 2.1.
+
+We ran $\alpha_r = 2.5$ at 0.2 and 0.8 $g_2$ from $|{\pm}2.5\rangle|0\rangle$. There $24 \times 8$ overestimates the switching 8.4 and 3.4 times, while $36 \times 14$ (0 to 3 µs) moves it by 3.1% and 2.4% from $32 \times 12$; the table uses $36 \times 14$. The contrast stays within 0.15% of linear, and the flip coefficient at 0.2 $g_2$ is 0.0262 of the $\alpha = 2.1$ value, against 0.0249 from the fit.
+
+| | $\alpha = 2.1$, 0.2 $g_2$ | $\alpha = 2.1$, 0.8 $g_2$ | $\alpha_r = 2.5$, 0.2 $g_2$ | $\alpha_r = 2.5$, 0.8 $g_2$ |
+|---|---|---|---|---|
+| 1% window | 36.6 µs | 2.30 µs | 51.8 µs | 3.24 µs |
+| Flip probability over it | $1.81 \times 10^{-3}$ | $4.44 \times 10^{-3}$ | $6.74 \times 10^{-5}$ | $2.20 \times 10^{-4}$ |
+| Best total error $P$ | $4.11 \times 10^{-3}$ | $8.71 \times 10^{-3}$ | $2.30 \times 10^{-4}$ | $6.60 \times 10^{-4}$ |
+
+The ramp costs time. In the mean field it settles to 1% in 0.686 µs up and 0.676 µs back, and with the readout drive on from the step $\mathrm{Re}\,b$ settles 0.23 µs later than from $|2.5\rangle$.
+
+![2.4 drive-induced flip coefficient against alpha](plots/task2_4_alpha.png)
+
+A second change removes the ringing. Two steps from the Task 2.3 pole $-\gamma \pm i\omega = -4.727 \pm 20.078i$ µs$^{-1}$, an amplitude $0.6769\,\epsilon_Z = \epsilon_Z/(1 + e^{-\gamma\pi/\omega})$ and then $\epsilon_Z$ from $t_1 = \pi/\omega = 0.1565$ µs, cut the overshoot at 0.1 $g_2$ from 44.2% to 0.01% and the 1% settling time from 0.965 to 0.250 µs. This serves a boxcar filter or feedback, but an integrating detector collects less over 0.5 µs (0.844 of the settled signal against 0.946 for the step), and at 1.6 $g_2$ the shaped drives settle after 2.150 and 2.135 µs against 1.195 µs for the step.
+
+![2.4 shaped turn-on](plots/task2_4_shaping.png)
+
+### (d) Why it works
+
+At fixed $\alpha$ both errors scale as $\epsilon_Z^2\tau$, so the drive only trades window against flips, and above about 0.2 $g_2$ the switching outgrows $\epsilon_Z^2$ and the floor rises. The lever is $\alpha^2 c(\alpha)$, and the sweep shows that $c$ comes from the drive and the confinement alone and falls about as $e^{-2\alpha^2}$, which $\alpha_r = 2.5$ confirms to 5% outside the fit range. Raising $\alpha$ to 2.5 lowers the floor 18 times at 0.2 $g_2$ and 13 times at 0.8 $g_2$, where the 1% window is 11 times shorter than at $\alpha = 2.1$ and 0.2 $g_2$ with 8 times fewer flips, for a ramp under 1 µs each way.
+
+Numbers come from `scripts/task2_4_circuit.py` and `scripts/task2_4_readout.py` (`logs/task2_4_circuit.log`, `logs/task2_4_analysis.log`), with the eigenvalues and time runs as the Slurm array `slurm/task2_4.sh`.
+
 ## AI use
 
 Claude Code (Anthropic) wrote the scripts in `scripts/` and `slurm/` and this README. Every number here is printed by those scripts or computed from the stated parameters, and each simulated number is checked against the analytic or semiclassical result beside it. From Task 1.3 on, each task was written by one Claude Code agent and then checked by two independent agents, one re-deriving the physics and one rerunning the headline numbers by a different route and matching every quoted number to the script logs; their findings were fixed before the section went in.
