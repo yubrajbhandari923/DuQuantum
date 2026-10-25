@@ -2,8 +2,7 @@ import { useEffect, useState } from 'react';
 import { LEVELS } from '../story/content';
 import { FETCH } from '../story/barks';
 import { LEVEL_COUNT, hasSet, nextLevel, useGame } from '../store';
-import { useAim } from '../lab/Lab';
-import { roman, useToast } from '../lab/Pickups';
+import { roman, useAim, useToast } from '../lab/Pickups';
 
 /** Collection notice, then (when a set completes) Heisenberg's arrival line. */
 function Toast() {

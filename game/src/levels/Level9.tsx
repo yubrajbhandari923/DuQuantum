@@ -41,6 +41,15 @@ function parityTrace() {
 const BIT = bitTrace();
 const PAR = parityTrace();
 
+/** Stage D map: each lifetime over its mission target, in decades, across the slider's alpha range (same rates as the readouts). */
+const AL = Array.from({ length: 81 }, (_, i) => 1 + i * 0.025);
+const MX = AL.map((a) => Math.log10(1 / gammaX(a) / 0.05)), MZ = AL.map((a) => Math.log10(1e6 / gammaZ(BASE.kappaA, a) / 2));
+const OKA = AL.filter((_, i) => MX[i] >= 0 && MZ[i] >= 0);
+const WINDOW: Series = [
+  { label: 'T_X / 50 ms', tone: 'cyan', x: AL, y: MX },
+  { label: 'T_Z / 2 µs', tone: 'amber', x: AL, y: MZ },
+];
+
 export default function Level9({ onComplete, onReport }: LevelProps) {
   // A: initialization
   const [amp, setAmp] = useState(1);
@@ -144,6 +153,9 @@ export default function Level9({ onComplete, onReport }: LevelProps) {
           ? <Oscilloscope series={paritySeries} xLabel="Time (µs)" yLabel="⟨Π⟩" yRange={[-0.1, 1.1]} />
           : <Feedback>Run the parity experiment to record how fast the cat loses its phase.</Feedback>)}
         {stage === 3 && <>
+        <Oscilloscope series={WINDOW} xLabel="Cat amplitude α" yLabel="log10 (lifetime / target)" yRange={[-1.5, 6]}
+          thresholds={[{ y: 0, label: 'mission line' }]} markers={[{ x: alphaD, label: `α = ${alphaD.toFixed(2)}` }]} />
+        <Feedback>Both curves must sit above the mission line. They do only for α between <span className="num">{OKA[0].toFixed(2)}</span> and <span className="num">{OKA[OKA.length - 1].toFixed(2)}</span>: T_X grows like exp(2α²), T_Z shrinks like 1/α².</Feedback>
         <Checklist items={[
           { label: `Bit-flip time T_X ≥ 50 ms (now ${fmtTX(txD)})`, done: txOk },
           { label: `Phase-flip time T_Z ≥ 2 µs (now ${tzD.toFixed(2)} µs)`, done: tzOk },
