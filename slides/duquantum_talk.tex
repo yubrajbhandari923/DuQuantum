@@ -127,6 +127,19 @@
   \item Each readout adds a bit-flip probability of $3.5\times10^{-3}$
 }{task2_3_b_trace}
 
+\figframe{Task 2.4: The readout trade-off}{
+  \item Total error = misreading + flips caused by the readout drive
+  \item Best at $\alpha = 2.1$: $3.9\times10^{-3}$, 85\% of it from flips
+  \item A stronger drive only trades listening time for flips; above $0.2\,g_2$ it gets worse
+}{task2_4_fom}
+
+\figframe{Task 2.4: Raise $\alpha$ for the readout}{
+  \item Drive-induced flips fall about as $e^{-2\alpha^2}$, the signal only as $1/\alpha$
+  \item Reading at $\alpha = 2.5$: error $2.3\times10^{-4}$, 18 times lower
+  \item Two-step turn-on cuts settling from 0.97 to 0.25 $\mu$s
+  \item Circuit level: only the pair term is resonant; the rest are calibratable shifts
+}{task2_4_alpha}
+
 \begin{frame}{Summary}
   \centering
   \begin{tabular}{ll}
@@ -139,6 +152,7 @@
     2.1 Bit flips & $\gamma = 3.02$ for $\alpha \le 1.4$; $T_X = 2.6$ s at $\alpha = 2.1$ \\
     2.2 Phase flips & $T_Z = 1.94\ \mu$s at $\alpha = 2.1$, slope $0.99998\times2\kappa_a$ \\
     2.3 Readout & contrast within 0.1\% of theory, settles in 0.97 $\mu$s \\
+    2.4 Readout optimization & read at $\alpha = 2.5$: error 18 times lower; settles in 0.25 $\mu$s \\
     \bottomrule
   \end{tabular}
 
