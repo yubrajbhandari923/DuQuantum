@@ -18,7 +18,7 @@ npm test           # vitest: physics and level-mission tests
 
 The workflow in `.github/workflows/pages.yml` builds and publishes the game when `game/` changes on `master`. In the repository's **Settings → Pages**, set **Build and deployment → Source** to **GitHub Actions**. The site URL is `https://yubrajbhandari923.github.io/DuQuantum/`.
 
-GitHub Pages serves static files, so the live Ask Schrödinger chat and speech endpoints need a separate backend to work online. The scripted voice lines and the rest of the game work without one. Keep API keys out of the Pages build and repository.
+GitHub Pages serves static files. For live Ask Schrödinger chat and speech, deploy `game/` as a Vercel project, set `GEMINI_API_KEY` and `ELEVENLABS_API_KEY` in the Vercel project's environment variables, and set the GitHub repository variable `TUTOR_API_URL` to that project's URL (for example, `https://your-project.vercel.app`). Re-run the Pages workflow after changing the repository variable. The Pages build embeds the backend URL, never the API keys. The scripted voice lines and the rest of the game work without a backend.
 
 ## Ask Schrödinger (tutor and voices)
 

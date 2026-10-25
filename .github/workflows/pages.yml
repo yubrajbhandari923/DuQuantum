@@ -35,6 +35,7 @@ jobs:
         working-directory: game
         env:
           VITE_BASE_PATH: /DuQuantum/
+          VITE_TUTOR_API_URL: ${{ vars.TUTOR_API_URL }}
       - uses: actions/upload-pages-artifact@v3
         with:
           path: game/dist

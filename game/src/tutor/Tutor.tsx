@@ -31,8 +31,9 @@ function context(): string {
 }
 
 async function post(path: string, body: BodyInit, type = 'application/json') {
-  const r = await fetch(`/api/tutor/${path}`, { method: 'POST', headers: { 'Content-Type': type }, body });
-  if (!r.ok) throw new Error((await r.json().catch(() => ({}))).error ?? 'The tutor could not answer just now.');
+  const api = (import.meta.env.VITE_TUTOR_API_URL || '').replace(/\/$/, '');
+  const r = await fetch(`${api}/api/tutor/${path}`, { method: 'POST', headers: { 'Content-Type': type }, body });
+  if (!r.ok) throw new Error((await r.json().catch(() => ({}))).error ?? (r.status === 404 ? 'The live tutor needs a connected API server.' : 'The tutor could not answer just now.'));
   return r;
 }
 
