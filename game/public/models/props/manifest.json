@@ -1,0 +1,170 @@
+[
+ {
+  "id": "radio-bush-dac10",
+  "file": "models/props/radio-bush-dac10.glb",
+  "sizeMeters": [
+   0.5,
+   0.336,
+   0.395
+  ],
+  "tris": 19854,
+  "notes": "origin bottom-centre, front +Z, metres; textures webp 1024px, meshopt; src asset_originals/sketchfab/1950_bush_dac10_vintage_radio.glb",
+  "suggestedUse": "Shelf/desk radio, 1940s Bakelite; front (dial, speaker) faces +Z"
+ },
+ {
+  "id": "book-stack",
+  "file": "models/props/book-stack.glb",
+  "sizeMeters": [
+   0.37,
+   0.25,
+   0.406
+  ],
+  "tris": 1620,
+  "notes": "origin bottom-centre, front +Z, metres; textures webp 1024px, meshopt; src asset_originals/sketchfab/book_stack.glb",
+  "suggestedUse": "Desk or shelf clutter"
+ },
+ {
+  "id": "bunsen-burner",
+  "file": "models/props/bunsen-burner.glb",
+  "sizeMeters": [
+   0.357,
+   0.25,
+   0.171
+  ],
+  "tris": 2756,
+  "notes": "origin bottom-centre, front +Z, metres; textures webp 1024px, meshopt; src asset_originals/sketchfab/bunsen_burner.glb",
+  "suggestedUse": "Lab bench; blue flame must be added separately"
+ },
+ {
+  "id": "computer-crt",
+  "file": "models/props/computer-crt.glb",
+  "sizeMeters": [
+   0.45,
+   0.209,
+   0.297
+  ],
+  "tris": 2524,
+  "notes": "origin bottom-centre, front +Z, metres; textures webp 1024px, meshopt; src asset_originals/sketchfab/computer.glb",
+  "suggestedUse": "90s beige PC tower + CRT + keyboard + mouse on one base; background/desk prop"
+ },
+ {
+  "id": "old-computer",
+  "file": "models/props/old-computer.glb",
+  "sizeMeters": [
+   0.45,
+   0.297,
+   0.498
+  ],
+  "tris": 9997,
+  "notes": "origin bottom-centre, front +Z, metres; textures webp 1024px, meshopt; src asset_originals/sketchfab/old_computer.glb",
+  "suggestedUse": "Portable 80s computer with screen (screen texture shows a glow; could overlay live canvas)"
+ },
+ {
+  "id": "paintings-pack",
+  "file": "models/props/paintings-pack.glb",
+  "sizeMeters": [
+   3,
+   1.616,
+   0.037
+  ],
+  "tris": 782,
+  "notes": "origin bottom-centre, front +Z, metres; textures webp 1024px, meshopt; src asset_originals/sketchfab/free_medieval_paintings_pack.glb",
+  "suggestedUse": "Gallery wall of ~24 framed paintings, 3 m wide, flat against z=0; hang on wall facing +Z"
+ },
+ {
+  "id": "voltmeter-rusty",
+  "file": "models/props/voltmeter-rusty.glb",
+  "sizeMeters": [
+   0.203,
+   0.2,
+   0.195
+  ],
+  "tris": 7550,
+  "notes": "origin bottom-centre, front +Z, metres; textures webp 512px, meshopt; src asset_originals/sketchfab/old_rusty_voltmeter.glb",
+  "suggestedUse": "Panel meter; face/dial toward +Z; dial glass is transparent so a needle can be added"
+ },
+ {
+  "id": "tesla-coil-soviet",
+  "file": "models/props/tesla-coil-soviet.glb",
+  "sizeMeters": [
+   0.606,
+   1.2,
+   0.606
+  ],
+  "tris": 12348,
+  "notes": "origin bottom-centre, front +Z, metres; textures webp 1024px, meshopt; src asset_originals/sketchfab/red_alert_2_-_soviet_tesla_coil.glb",
+  "suggestedUse": "Hero prop / level-station centrepiece, 1.2 m (scale freely)"
+ },
+ {
+  "id": "tesla-coil-gun",
+  "file": "models/props/tesla-coil-gun.glb",
+  "sizeMeters": [
+   0.183,
+   0.209,
+   0.6
+  ],
+  "tris": 3000,
+  "notes": "origin bottom-centre, front +Z, metres; textures webp 1024px, meshopt; src asset_originals/sketchfab/tesla_coil_gun.glb",
+  "suggestedUse": "Marginal; sci-fi barrel pointing +Z, 0.6 m"
+ },
+ {
+  "id": "time-bomb",
+  "file": "models/props/time-bomb.glb",
+  "sizeMeters": [
+   0.2,
+   0.107,
+   0.093
+  ],
+  "tris": 20128,
+  "notes": "origin bottom-centre, front +Z, metres; textures webp 1024px, meshopt; src asset_originals/sketchfab/time_bomb.glb",
+  "suggestedUse": "Dynamite bundle with timer; alternative to src/lab/Bomb.tsx"
+ },
+ {
+  "id": "typewriter-underwood",
+  "file": "models/props/typewriter-underwood.glb",
+  "sizeMeters": [
+   0.349,
+   0.195,
+   0.308
+  ],
+  "tris": 37072,
+  "notes": "origin bottom-centre, front +Z, metres; textures webp 256px, meshopt; src asset_originals/sketchfab/underwood_no._5_typewriter__vintage_3d_prop.glb; stray node removed: modifiers_wrench; simplify stalled above 25k tris",
+  "suggestedUse": "Desk prop, keys toward +Z; over the 25k tri target"
+ },
+ {
+  "id": "vacuum-tube-instruments",
+  "file": "models/props/vacuum-tube-instruments.glb",
+  "sizeMeters": [
+   0.289,
+   0.23,
+   0.254
+  ],
+  "tris": 9718,
+  "notes": "origin bottom-centre, front +Z, metres; textures webp 1024px, meshopt; src asset_originals/sketchfab/vacuum_tube_instruments.glb",
+  "suggestedUse": "Bench instrument with two glowing-capable bulbs; has emissive"
+ },
+ {
+  "id": "desk-lamp",
+  "file": "models/props/desk-lamp.glb",
+  "sizeMeters": [
+   0.349,
+   0.45,
+   0.265
+  ],
+  "tris": 22000,
+  "notes": "origin bottom-centre, front +Z, metres; textures webp 1024px, meshopt; src asset_originals/sketchfab/vintage_desk_lamp.glb",
+  "suggestedUse": "Banker lamp, green glass shade; point light goes under shade (~y 0.38)"
+ },
+ {
+  "id": "microscope",
+  "file": "models/props/microscope.glb",
+  "sizeMeters": [
+   0.179,
+   0.35,
+   0.226
+  ],
+  "tris": 21993,
+  "notes": "origin bottom-centre, front +Z, metres; textures webp 512px, meshopt; src asset_originals/sketchfab/vintage_microscope(1).glb",
+  "suggestedUse": "Bench prop, brass; base feet toward +Z"
+ }
+]

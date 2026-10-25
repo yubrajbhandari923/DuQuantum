@@ -1,13 +1,13 @@
 import { Suspense, useCallback, useState } from 'react';
 import { LEVELS } from '../story/content';
-import { LEVEL_COUNT, useGame } from '../store';
+import { LEVEL_COUNT, hasSet, useGame } from '../store';
 import { LEVEL_SCREENS } from '../levels';
 import { Dialogue } from './Dialogue';
 import { play } from '../audio/sfx';
 
 /** Wraps one level: intro dialogue, the bench, hint tiers, reset, and the completion sheet. */
 export function LevelFrame() {
-  const { level, complete, go, openLevel, openPanel } = useGame();
+  const { level, complete, go, openLevel, openPanel, collected, completed } = useGame();
   const content = LEVELS.find((l) => l.id === level)!;
   const Screen = LEVEL_SCREENS[level];
   const [phase, setPhase] = useState<'intro' | 'play' | 'won'>('intro');
@@ -51,7 +51,9 @@ export function LevelFrame() {
             <button className="btn" onClick={() => go('hub')}>Back to lab</button>
             <button className="btn" onClick={() => setPhase('play')}>Keep experimenting</button>
             {level < LEVEL_COUNT
-              ? <button className="btn primary" onClick={() => openLevel(level + 1)}>Next experiment</button>
+              ? hasSet(collected, completed, level + 1)
+                ? <button className="btn primary" onClick={() => openLevel(level + 1)}>Next experiment</button>
+                : <button className="btn primary" onClick={() => go('hub')}>Fetch the next components</button>
               : <button className="btn primary" onClick={() => go('ending')}>Open the box</button>}
           </p>
         </div></div>

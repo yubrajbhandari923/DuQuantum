@@ -5,12 +5,11 @@ import { Lab } from './lab/Lab';
 import { useGame } from './store';
 import { Menu, Manual } from './ui/Menu';
 import { Hub } from './ui/Hub';
-import { Dialogue } from './ui/Dialogue';
+import { Cutscene } from './ui/Cutscene';
 import { LevelFrame } from './ui/LevelFrame';
 import { Blueprint, Notebook, Settings } from './ui/Overlays';
 import { Ending } from './ui/Ending';
 import Sandbox from './levels/Sandbox';
-import { INTRO } from './story/content';
 import './styles/theme.css';
 import './styles/ui.css';
 
@@ -32,7 +31,7 @@ export default function App() {
       </Canvas>
       {screen === 'menu' && <Menu />}
       {screen === 'manual' && <Manual />}
-      {screen === 'intro' && <Dialogue lines={INTRO} onDone={() => go('hub')} />}
+      {screen === 'cutscene' && <Cutscene />}
       {screen === 'hub' && <Hub />}
       {screen === 'level' && <LevelFrame />}
       {screen === 'ending' && <Ending />}

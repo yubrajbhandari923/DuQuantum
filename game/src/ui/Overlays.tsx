@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { LEVELS } from '../story/content';
-import { LEVEL_COUNT, isUnlocked, useGame } from '../store';
+import { LEVEL_COUNT, hasSet, isUnlocked, nextLevel, useGame } from '../store';
+import { FETCH } from '../story/barks';
 import { play } from '../audio/sfx';
 
 const Close = ({ label = 'Close' }: { label?: string }) => {
@@ -9,19 +10,19 @@ const Close = ({ label = 'Close' }: { label?: string }) => {
 };
 
 export function Blueprint() {
-  const { completed, openLevel, openPanel } = useGame();
+  const { completed, collected, openLevel, openPanel } = useGame();
   return (
     <div className="scrim" onClick={() => openPanel(null)}><div className="sheet panel" onClick={(e) => e.stopPropagation()} role="dialog" aria-label="Laboratory blueprint">
       <h2>Laboratory blueprint</h2>
       <p className="muted">{completed.length} of {LEVEL_COUNT} experiments complete. Locked experiments open in order.</p>
       <div className="blueprint">
         {LEVELS.map((l) => {
-          const open = isUnlocked(completed, l.id);
+          const open = isUnlocked(completed, l.id), parts = hasSet(collected, completed, l.id);
           return (
-            <button key={l.id} className={`bp${completed.includes(l.id) ? ' done' : ''}`} disabled={!open} onClick={() => { play('connect'); openLevel(l.id); }}>
+            <button key={l.id} className={`bp${completed.includes(l.id) ? ' done' : ''}`} disabled={!open || !parts} onClick={() => { play('connect'); openLevel(l.id); }}>
               <span className="n">{l.id}</span>
               <b>{open ? l.title : 'Locked'}</b>
-              <small>{completed.includes(l.id) ? 'Complete' : l.subtitle}</small>
+              <small>{completed.includes(l.id) ? 'Complete' : open && !parts ? 'Components missing' : l.subtitle}</small>
             </button>
           );
         })}
@@ -59,7 +60,8 @@ export function Notebook() {
 }
 
 export function Settings() {
-  const { settings, setSettings, resetAll } = useGame();
+  const { settings, setSettings, resetAll, completed, collected, collect } = useGame();
+  const missing = (FETCH[nextLevel(completed)] ?? []).filter((f) => !collected.includes(f.id)).map((f) => f.id);
   return (
     <div className="scrim" onClick={() => useGame.getState().openPanel(null)}><div className="sheet panel" style={{ maxWidth: 480 }} onClick={(e) => e.stopPropagation()} role="dialog" aria-label="Settings">
       <h2>Settings</h2>
@@ -70,6 +72,12 @@ export function Settings() {
           <option value="high">High</option><option value="low">Low (faster)</option>
         </select>
       </label>
+      <div className="toggle"><span>Stuck searching the study?</span>
+        <button className="btn small" disabled={!missing.length} onClick={() => { play('success'); collect(missing); }}>Fetch them for me</button>
+      </div>
+      <div className="toggle"><span>Opening scene</span>
+        <button className="btn small" onClick={() => useGame.getState().go('cutscene')}>Replay intro</button>
+      </div>
       <div className="toggle"><span>Erase all progress</span>
         <button className="btn small" onClick={() => window.confirm('Erase every completed experiment and notebook page?') && resetAll()}>Reset campaign</button>
       </div>

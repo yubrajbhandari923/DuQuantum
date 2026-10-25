@@ -1,31 +1,16 @@
 import type { DialogueLine, LevelContent } from '../types';
 
 export const INTRO: DialogueLine[] = [
-  {
-    who: 'schrodinger',
-    text: 'Dear Experimentalist, I have sealed your cat inside a box containing a very special device.',
-  },
-  {
-    who: 'schrodinger',
-    text: 'If you would like your cat back, I suggest you learn quantum mechanics. — E. Schrödinger',
-  },
-  {
-    who: 'heisenberg',
-    text: 'Of course. Theoretical physicists. Always leaving someone else to do the actual experiment.',
-  },
-  {
-    who: 'heisenberg',
-    text: "Listen carefully. We need to build a quantum computer. And judging by these notes, we're starting from nothing.",
-  },
+  { who: 'heisenberg', text: "Your cat, in my chamber, under my bomb. I am the one who knocks." },
+  { who: 'schrodinger', text: "Do not panic. The lock opens for physics, and you can do physics. Ten experiments, in a row." },
+  { who: 'schrodinger', text: "Find the parts around the study, assemble them at the big desk, read the monitor. Werner will offer advice. Check his sums." },
 ];
 
 export const ENDING: DialogueLine[] = [
-  {
-    who: 'narrator',
-    text: 'The bomb powers down. The cat walks out of the box and meows.',
-  },
-  { who: 'heisenberg', text: 'All that effort. For one cat.' },
-  { who: 'heisenberg', text: "Still better than Schrödinger's approach." },
+  { who: 'narrator', text: "The tenth bar goes dark. The bomb powers down. The glass door slides open and the cat walks out, meowing." },
+  { who: 'schrodinger', text: "There you are. Alive, and entirely decided. Splendid work." },
+  { who: 'heisenberg', text: "This is not over. I was being generous. The physics was a test, and you cheated by passing it." },
+  { who: 'heisenberg', text: "Fine. Keep the cat. I am leaving, and I will not be told otherwise." },
 ];
 
 export const LEVELS: LevelContent[] = [
@@ -34,29 +19,13 @@ export const LEVELS: LevelContent[] = [
     title: 'The Quantum Ladder',
     subtitle: 'Trap a quantum of energy',
     intro: [
-      {
-        who: 'schrodinger',
-        text: 'Note: the ladder is simple, and that is exactly the trap. Start from the bottom rung. — E. Schrödinger',
-      },
-      {
-        who: 'heisenberg',
-        text: 'Assemble an LC circuit. Its frequency depends only on the inductor and the capacitor.',
-      },
-      {
-        who: 'heisenberg',
-        text: 'Then quantize it. The energy comes in equal steps, and that is the whole problem.',
-      },
+      { who: 'schrodinger', text: "First lock, my friend. An inductor and a capacitor from around the study, assembled at the big desk. — E. Schrödinger" },
+      { who: 'heisenberg', text: "A ladder with equal rungs. Perfect. Every step is special." },
+      { who: 'schrodinger', text: "Werner means well. Check the monitor before you believe him." },
     ],
     outro: [
       { who: 'heisenberg', text: "Congratulations. You've built an extremely expensive spring." },
-      {
-        who: 'heisenberg',
-        text: 'Equal spacing means every drive hits every transition. Useless for a qubit. Keep going.',
-      },
-      {
-        who: 'schrodinger',
-        text: 'Every rung identical, yet you must still choose which one matters. Isn\'t that delicious?',
-      },
+      { who: 'schrodinger', text: "Every rung identical, and so the drive cannot choose one. The first bar goes dark." },
     ],
     takeaway:
       'An LC circuit is a harmonic oscillator with levels E_n = hbar*omega*(n+1/2) spaced equally, so a qubit needs more than the bare oscillator.',
@@ -82,25 +51,13 @@ export const LEVELS: LevelContent[] = [
     title: 'The Forbidden Transition',
     subtitle: 'Anharmonicity and Bloch rotations',
     intro: [
-      {
-        who: 'schrodinger',
-        text: 'Note: your ladder is too evenly spaced to be useful. Add something imperfect. — E. Schrödinger',
-      },
-      {
-        who: 'heisenberg',
-        text: 'Josephson junction. A nonlinear inductor. It makes the rungs uneven, so one transition becomes special.',
-      },
-      {
-        who: 'heisenberg',
-        text: 'Tune your drive to the 0-1 transition, then calibrate a pi pulse and a pi/2 pulse. Do it precisely.',
-      },
+      { who: 'schrodinger', text: "Second lock. The ladder is too even. Find the junction chip and take it to the desk. — E. Schrödinger" },
+      { who: 'heisenberg', text: "A junction is a resistor with ambitions. Nothing to it." },
+      { who: 'schrodinger', text: "A nonlinear inductor, actually. Tune to the 0-1 step, then calibrate your pulses on the monitor." },
     ],
     outro: [
       { who: 'heisenberg', text: "Half zero, half one. No, that doesn't mean we only did half the work." },
-      {
-        who: 'schrodinger',
-        text: 'The fringes return when the second pulse turns. Coherence is a phase, and phases are what reveal it.',
-      },
+      { who: 'schrodinger', text: "The fringes return when the second pulse turns. Coherence is a phase, and the second bar goes dark." },
     ],
     takeaway:
       'A Josephson junction makes the transitions unequally spaced, so a pi pulse at the 0-1 frequency takes |0> to |1> and a pi/2 pulse creates the superposition |+>.',
@@ -129,28 +86,13 @@ export const LEVELS: LevelContent[] = [
     title: 'The Great Quantum Escape',
     subtitle: 'Other bosonic encodings',
     intro: [
-      {
-        who: 'schrodinger',
-        text: 'Note: the code need not be |0> and |1>. Consider the pair |0> and |4>, and see whether the box still keeps them apart. — E. Schrödinger',
-      },
-      {
-        who: 'heisenberg',
-        text: 'Fine. But no single pulse jumps from 0 to 4. You climb in steps, and you check each rung.',
-      },
-      {
-        who: 'heisenberg',
-        text: 'Then watch them leak. Photon loss does not read the rulebook.',
-      },
+      { who: 'schrodinger', text: "Third lock. Collect the parts from the cabinets and the bench, then compare two codes on the monitor. — E. Schrödinger" },
+      { who: 'heisenberg', text: "Zero to four in one pulse. Just push harder." },
+      { who: 'schrodinger', text: "No single pulse jumps four rungs. Climb, check each step, then watch them leak." },
     ],
     outro: [
-      {
-        who: 'heisenberg',
-        text: 'Separation is not protection. A photon lost from |4> still lands outside the code.',
-      },
-      {
-        who: 'schrodinger',
-        text: 'Distance is a comfort, not a shield. Something must actively keep the code space closed. — E. Schrödinger',
-      },
+      { who: 'heisenberg', text: "Separation is protection. Four rungs away is four rungs safe." },
+      { who: 'schrodinger', text: "Distance is a comfort, not a shield. A lost photon finds both. Lock three opens." },
     ],
     takeaway:
       'Code states that are far apart in Fock number still need intermediate steps to prepare, and photon loss still moves them out of the code space, so separation alone is not protection.',
@@ -175,28 +117,13 @@ export const LEVELS: LevelContent[] = [
     title: 'The Quantum Wave Machine',
     subtitle: 'Coherent states',
     intro: [
-      {
-        who: 'schrodinger',
-        text: 'Note: vacuum is not empty. Shake it with a drive and it becomes a wave with a definite phase. — E. Schrödinger',
-      },
-      {
-        who: 'heisenberg',
-        text: 'Displacement. Start from vacuum, apply the drive, and the state moves in phase space to alpha.',
-      },
-      {
-        who: 'heisenberg',
-        text: 'Match the mean photon number to the target, then prepare the two opposite phases. Do not get lazy.',
-      },
+      { who: 'schrodinger', text: "Fourth lock. A drive from the armchair, assembled at the desk. Vacuum is not empty. — E. Schrödinger" },
+      { who: 'heisenberg', text: "Add photons until it is a wave. Count them one by one." },
+      { who: 'schrodinger', text: "Displace the vacuum instead, and match the mean photon number on the monitor." },
     ],
     outro: [
-      {
-        who: 'heisenberg',
-        text: 'Mean photon number is |alpha|^2. Easy. The hard part is the phase, which you cannot see on a spectrum.',
-      },
-      {
-        who: 'schrodinger',
-        text: 'Two waves, mirror images, equally real. You will need them both. — E. Schrödinger',
-      },
+      { who: 'heisenberg', text: "Mean photon number is alpha squared. I said so first." },
+      { who: 'schrodinger', text: "Two waves, mirror images, equally real. You will need both. Lock four opens." },
     ],
     takeaway:
       'A coherent state |alpha> is the displaced vacuum with mean photon number |alpha|^2 and Poisson photon statistics, and |+alpha> and |-alpha> are its opposite-phase versions.',
@@ -225,28 +152,13 @@ export const LEVELS: LevelContent[] = [
     title: 'Two Cats, One Box',
     subtitle: 'Superposition versus mixture',
     intro: [
-      {
-        who: 'schrodinger',
-        text: 'Note: a cat is the sum of two waves, not a choice between them. Only the sum is the cat. — E. Schrödinger',
-      },
-      {
-        who: 'heisenberg',
-        text: 'Four candidates. One even cat. Check the photon parity and the Wigner function.',
-      },
-      {
-        who: 'heisenberg',
-        text: 'If there are no negative regions, it is a mixture, and a mixture is just two boring blobs.',
-      },
+      { who: 'schrodinger', text: "Fifth lock. Gather the cat parts and a tomography lens, then assemble at the desk. — E. Schrödinger" },
+      { who: 'heisenberg', text: "Negative probability? Absurd. Throw the plot away." },
+      { who: 'schrodinger', text: "It is not a probability. Look at the fringes on the monitor, and check the parity." },
     ],
     outro: [
-      {
-        who: 'heisenberg',
-        text: 'Two blobs with no fringes is a mixture. Fringes with negative regions is coherence. The difference matters.',
-      },
-      {
-        who: 'schrodinger',
-        text: 'Even cat, parity plus one. The box holds a superposition now. Do not open it too early.',
-      },
+      { who: 'heisenberg', text: "Two blobs. A cat. Done." },
+      { who: 'schrodinger', text: "Two blobs plus fringes. Even cat, parity plus one. Lock five opens." },
     ],
     takeaway:
       'The cat state |C+/-> is a superposition of |+alpha> and |-alpha> with definite photon parity, and only the superposition shows Wigner interference fringes that a mixture of the two cannot produce.',
@@ -275,25 +187,13 @@ export const LEVELS: LevelContent[] = [
     title: 'The Photon Thief',
     subtitle: 'Loss and decoherence',
     intro: [
-      {
-        who: 'schrodinger',
-        text: 'Note: the box is leaky. Photons drift out, and the cat shrinks toward nothing. — E. Schrödinger',
-      },
-      {
-        who: 'heisenberg',
-        text: 'Measure the amplitude decay, then the parity decay. Compare single-photon loss with two-photon loss.',
-      },
-      {
-        who: 'heisenberg',
-        text: 'Then decide which logical error dominates. Not every error is the same kind of wrong.',
-      },
+      { who: 'schrodinger', text: "Sixth lock. The box is leaky. Gather the loss tools and watch the cat shrink on the monitor. — E. Schrödinger" },
+      { who: 'heisenberg', text: "Photon loss is a bookkeeping error. Ignore it." },
+      { who: 'schrodinger', text: "One photon flips the parity. Measure the amplitude and the parity separately." },
     ],
     outro: [
-      { who: 'heisenberg', text: 'Your cat was doing fine until the universe started asking questions.' },
-      {
-        who: 'schrodinger',
-        text: 'One photon flips the parity. Two photons leave it intact, but they cannot hold the cat up. — E. Schrödinger',
-      },
+      { who: 'heisenberg', text: "Your cat was doing fine until the universe started asking questions." },
+      { who: 'schrodinger', text: "Two photons leave parity intact but cannot hold the cat up. Lock six opens." },
     ],
     takeaway:
       'Single-photon loss decays the cat amplitude and flips its parity, acting as a logical phase error, while two-photon loss conserves parity but drains the amplitude toward zero without a drive.',
@@ -321,25 +221,13 @@ export const LEVELS: LevelContent[] = [
     title: 'The Quantum Immortality Machine',
     subtitle: 'Engineered dissipation',
     intro: [
-      {
-        who: 'schrodinger',
-        text: 'Note: the thief can be turned into a bouncer. Give the photons a path that only the wrong states can take. — E. Schrödinger',
-      },
-      {
-        who: 'heisenberg',
-        text: 'Two-photon loss, engineered on purpose. It pushes the cat back to its target amplitude.',
-      },
-      {
-        who: 'heisenberg',
-        text: 'Tune the rate and the target alpha, then wait for the recovery and settling criteria to pass. Patience.',
-      },
+      { who: 'schrodinger', text: "Seventh lock. Turn the thief into a bouncer. Fetch the dissipator, assemble at the desk. — E. Schrödinger" },
+      { who: 'heisenberg', text: "Keep watching the cat. Stabilization is just staring." },
+      { who: 'schrodinger', text: "No staring. Engineered pair loss pushes the cat home, and the monitor will show when it settles." },
     ],
     outro: [
-      { who: 'heisenberg', text: 'Using dissipation to fight dissipation. I hate how much sense that makes.' },
-      {
-        who: 'schrodinger',
-        text: 'The cat is never measured, and yet it stays itself. A dark state. Keep it that way. — E. Schrödinger',
-      },
+      { who: 'heisenberg', text: "Using dissipation to fight dissipation. I hate how much sense that makes." },
+      { who: 'schrodinger', text: "A dark state. The cat is never measured, and stays itself. Lock seven opens." },
     ],
     takeaway:
       'Engineered two-photon dissipation with jump operator L2 = sqrt(kappa2)*(a^2 - alpha^2) makes cat states dark states that stabilize the logical subspace without measuring which logical state is stored.',
@@ -364,25 +252,13 @@ export const LEVELS: LevelContent[] = [
     title: 'The Superconducting Frankenstein',
     subtitle: 'Memory, buffer, nonlinear coupling',
     intro: [
-      {
-        who: 'schrodinger',
-        text: 'Note: the cat is a memory. Hold it in one mode, and let a lossy buffer do the rest. — E. Schrödinger',
-      },
-      {
-        who: 'heisenberg',
-        text: 'Memory, buffer, a SQUID for the nonlinearity, and a pump to make the coupling happen.',
-      },
-      {
-        who: 'heisenberg',
-        text: 'Set the pump to the frequency that makes the three-wave mixing work. Then balance the rates. No excuses.',
-      },
+      { who: 'schrodinger', text: "Eighth lock. Memory, buffer, SQUID and pump. Gather them all and build the thing at the desk. — E. Schrödinger" },
+      { who: 'heisenberg', text: "Pump at the memory frequency. Simple matching." },
+      { who: 'schrodinger', text: "Twice the memory, less the buffer. Then mind the overshoot on the monitor." },
     ],
     outro: [
-      { who: 'heisenberg', text: 'Finally. Actual hardware.' },
-      {
-        who: 'schrodinger',
-        text: 'The reduced model is elegant. The full model is honest, and it overshoots first. — E. Schrödinger',
-      },
+      { who: 'heisenberg', text: "Finally. Actual hardware." },
+      { who: 'schrodinger', text: "The reduced model is elegant. The full model is honest, and it overshoots first. Lock eight opens." },
     ],
     takeaway:
       'A memory mode coupled through a SQUID and a pump to a lossy buffer gets effective two-photon dissipation with kappa2 = 4*g2^2/kappa_b, valid when the buffer is adiabatically eliminated.',
@@ -411,28 +287,13 @@ export const LEVELS: LevelContent[] = [
     title: 'The Million-to-One Gamble',
     subtitle: 'Bit flips versus phase flips',
     intro: [
-      {
-        who: 'schrodinger',
-        text: 'Note: a bigger cat hides bit flips well, but leaves the phase exposed. Choose carefully. — E. Schrödinger',
-      },
-      {
-        who: 'heisenberg',
-        text: 'Initialize the logical zero as a positive cat. Then measure both error rates.',
-      },
-      {
-        who: 'heisenberg',
-        text: 'Fit the bit-flip decay and the phase-flip decay. Pick an alpha that satisfies both constraints.',
-      },
+      { who: 'schrodinger', text: "Ninth lock. Bring the fit kit to the desk and read the two error rates on the monitor. — E. Schrödinger" },
+      { who: 'heisenberg', text: "Bigger cat, fewer errors of every kind. Make it huge." },
+      { who: 'schrodinger', text: "Bit flips fall, phase flips grow. One knob, two errors. Choose carefully." },
     ],
     outro: [
-      {
-        who: 'heisenberg',
-        text: 'Two rates, one knob. Bigger cat, fewer bit flips, more phase flips. Pick your poison.',
-      },
-      {
-        who: 'schrodinger',
-        text: 'These benchmark numbers exist only in the model. The gamble, however, is quite real. — E. Schrödinger',
-      },
+      { who: 'heisenberg', text: "Two rates, one knob. Pick your poison." },
+      { who: 'schrodinger', text: "These numbers live in the model, but the gamble is real. Lock nine opens." },
     ],
     takeaway:
       'The bit-flip rate falls exponentially with cat size while the phase-flip rate grows with alpha squared, so the best alpha balances the two error rates rather than maximizing one.',
@@ -457,32 +318,14 @@ export const LEVELS: LevelContent[] = [
     title: "Don't Measure the Cat!",
     subtitle: 'Readout and backaction',
     intro: [
-      {
-        who: 'schrodinger',
-        text: 'Note: looking at the cat changes the cat. Your readout is an interrogation, and the cat may talk back. — E. Schrödinger',
-      },
-      {
-        who: 'heisenberg',
-        text: 'Assemble the readout chain. Apply a drive along the logical Z direction and read out the buffer.',
-      },
-      {
-        who: 'heisenberg',
-        text: "You're not interrogating a suspect. Turn the power down.",
-      },
-      {
-        who: 'heisenberg',
-        text: 'Then optimize drive, time, alpha and pulse shape together. Minimize the total error, then read the bit.',
-      },
+      { who: 'schrodinger', text: "The last lock. Detector, drive and output line. Assemble the readout chain at the desk. — E. Schrödinger" },
+      { who: 'heisenberg', text: "Maximum drive. Read the bit loud and clear." },
+      { who: 'schrodinger', text: "Gently, please. Looking at the cat changes the cat. Sweep drive and time on the monitor." },
+      { who: 'heisenberg', text: "You're not interrogating a suspect. Turn the power down. Or do not. I am not worried." },
     ],
     outro: [
-      {
-        who: 'heisenberg',
-        text: 'Logical state resolved. Your cat is no longer a question, which is more than most physicists manage.',
-      },
-      {
-        who: 'schrodinger',
-        text: 'Measure gently and the cat remains a cat. Measure too hard and you get exactly what you asked for. — E. Schrödinger',
-      },
+      { who: 'heisenberg', text: "Logical state resolved. Your cat is no longer a question, which is more than most physicists manage." },
+      { who: 'schrodinger', text: "Measure gently and the cat remains a cat. The final bar goes dark." },
     ],
     takeaway:
       'A readout drive along logical Z reveals the bit through the sign of the buffer quadrature, but a stronger drive increases switching, so total error has an optimum rather than being minimized by maximum drive.',

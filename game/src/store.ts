@@ -1,7 +1,8 @@
 import { create } from 'zustand';
 import { setMuted, setVolume } from './audio/sfx';
+import { FETCH } from './story/barks';
 
-export type Screen = 'menu' | 'intro' | 'hub' | 'level' | 'ending' | 'manual' | 'sandbox';
+export type Screen = 'menu' | 'cutscene' | 'hub' | 'level' | 'ending' | 'manual' | 'sandbox';
 export const LEVEL_COUNT = 10;
 const KEY = 'sle-save-v1';
 
@@ -10,10 +11,11 @@ interface Save {
   notes: number[]; // notebook pages discovered
   best: Record<number, number>;
   started: boolean;
+  collected: string[]; // FETCH component ids picked up in the study
   settings: { muted: boolean; master: number; quality: 'low' | 'high' };
 }
 
-const fresh = (): Save => ({ completed: [], notes: [], best: {}, started: false, settings: { muted: false, master: 0.7, quality: 'high' } });
+const fresh = (): Save => ({ completed: [], notes: [], best: {}, started: false, collected: [], settings: { muted: false, master: 0.7, quality: 'high' } });
 
 function load(): Save {
   try {
@@ -31,14 +33,15 @@ interface Game extends Save {
   complete: (id: number, score: number) => void;
   openPanel: (p: Game['panel']) => void;
   setSettings: (p: Partial<Save['settings']>) => void;
+  collect: (ids: string[]) => void;
   newGame: () => void;
   resetAll: () => void;
 }
 
 export const useGame = create<Game>((set, get) => {
   const persist = () => {
-    const { completed, notes, best, started, settings } = get();
-    try { localStorage.setItem(KEY, JSON.stringify({ completed, notes, best, started, settings })); } catch { /* storage unavailable */ }
+    const { completed, notes, best, started, settings, collected } = get();
+    try { localStorage.setItem(KEY, JSON.stringify({ completed, notes, best, started, settings, collected })); } catch { /* storage unavailable */ }
   };
   const init = load();
   setMuted(init.settings.muted); setVolume('master', init.settings.master);
@@ -62,10 +65,14 @@ export const useGame = create<Game>((set, get) => {
       setMuted(settings.muted); setVolume('master', settings.master);
       set({ settings }); persist();
     },
-    newGame: () => { set({ ...fresh(), settings: get().settings, started: true, screen: 'intro' }); persist(); },
+    collect: (ids) => { set({ collected: [...new Set([...get().collected, ...ids])] }); persist(); },
+    newGame: () => { set({ ...fresh(), settings: get().settings, started: true, screen: 'cutscene' }); persist(); },
     resetAll: () => { set({ ...fresh(), screen: 'menu' }); persist(); },
   };
 });
 
 export const isUnlocked = (completed: number[], id: number) => id === 1 || completed.includes(id - 1);
 export const nextLevel = (completed: number[]) => Math.min(LEVEL_COUNT, completed.length ? Math.max(...completed) + 1 : 1);
+/** A level's bench can be powered once all its components are on the desk (finished levels always count). */
+export const hasSet = (collected: string[], completed: number[], id: number) =>
+  completed.includes(id) || (FETCH[id] ?? []).every((f) => collected.includes(f.id));

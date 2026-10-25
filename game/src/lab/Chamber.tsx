@@ -5,6 +5,8 @@ import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { useGame } from '../store';
 import { C } from '../styles/colors';
+import { useActors } from './actors';
+import { BombDevice } from './Bomb';
 
 type Mats = Record<'fur' | 'white', THREE.Material>;
 function Tail({ i, refs, mats }: { i: number; refs: React.MutableRefObject<(THREE.Group | null)[]>; mats: Mats }) {
@@ -95,7 +97,7 @@ class Guard extends Component<{ fallback: ReactNode; children: ReactNode }, { ba
   render() { return this.state.bad ? this.props.fallback : this.props.children; }
 }
 
-function AnyCat({ ghost = false, walk }: { ghost?: boolean; walk: React.MutableRefObject<number> }) {
+export function AnyCat({ ghost = false, walk }: { ghost?: boolean; walk: React.MutableRefObject<number> }) {
   const fb = <Cat ghost={ghost} walk={walk} />;
   return <Guard fallback={<Guard fallback={fb}><Suspense fallback={null}><CatGLB url={CAT} ghost={ghost} walk={walk} /></Suspense></Guard>}><Suspense fallback={null}><CatGLB url={BICOLOR} yaw={BICOLOR_YAW} ghost={ghost} walk={walk} /></Suspense></Guard>;
 }
@@ -128,11 +130,13 @@ export function Chamber({ open, radius, quality = 'high' }: { open: boolean; rad
     const e = ease(k.current);
     const ready = open || ending;
     // glass lifts (0..0.35), lights go green, cat walks out (0.3..1)
-    if (glass.current) glass.current.position.y = 0.2 + ease(Math.min(1, e / 0.35)) * 2.4;
+    const act = useActors.getState(); // the intro lifts the jar and brings the cat in
+    if (glass.current) glass.current.position.y = 0.2 + Math.max(ease(Math.min(1, e / 0.35)), act.jar) * 2.4;
     const wk = ease(Math.min(1, Math.max(0, (e - 0.3) / 0.7)));
     const out = wk * (radius + 1.1);
     if (cat.current) { cat.current.position.set(0, 0.2 - wk * 0.2 * Math.min(1, out / 1), out); cat.current.position.y = 0.2 * (1 - Math.min(1, out / (radius * 0.8))) + walk.current * Math.abs(Math.sin(t * 9)) * 0.04; }
     walk.current = wk > 0 && wk < 1 ? 1 : 0;
+    if (cat.current) cat.current.visible = act.catInChamber || ending;
     const green = ending ? Math.min(1, e * 3) : 0;
     lights.current.forEach((m, i) => {
       const blink = ready ? 0.55 + 0.45 * Math.sin(t * 2 + i) : Math.sin(t * 3 + i * 0.8) > 0 ? 1 : 0.15;
@@ -189,6 +193,7 @@ export function Chamber({ open, radius, quality = 'high' }: { open: boolean; rad
         <group ref={ghost}><group><AnyCat ghost walk={ghostWalk} /></group></group>
       </group>
       <pointLight ref={glow} position={[0, 1.4, 0]} color={C.amber} intensity={2.5} distance={6} />
+      <BombDevice />
     </group>
   );
 }

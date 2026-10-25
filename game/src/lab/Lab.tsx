@@ -2,40 +2,46 @@ import { useEffect, useMemo, useRef } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
 import { create } from 'zustand';
-import { LEVEL_COUNT, isUnlocked, useGame } from '../store';
-import { C } from '../styles/colors';
+import { LEVEL_COUNT, hasSet, nextLevel, useGame } from '../store';
 import { play } from '../audio/sfx';
 import { Suspense } from 'react';
-import { PROPS, Room } from './Scenery';
+import { Room } from './Scenery';
 import { Chamber } from './Chamber';
 import { CHARACTERS, Characters } from './Characters';
-import { Station } from './Stations';
+import { BODY, COLLIDERS, DESK, EYE, SPAWN, SPOTS, WALL } from './layout';
+import { Desk } from './Desk';
+import { Pickups, collect, waiting } from './Pickups';
+import { Intro3D } from './Intro3D';
 
-/** Which console the reticle is on (null = none). Only written when it changes. */
-export const useAim = create<{ aimed: number | null; set: (n: number | null) => void }>((set) => ({ aimed: null, set: (aimed) => set({ aimed }) }));
+/** What the reticle is on: 'monitor' | 'desk' | a FETCH component id | null. Only written when it changes. */
+export const useAim = create<{ aimed: string | null; set: (n: string | null) => void }>((set) => ({ aimed: null, set: (aimed) => set({ aimed }) }));
 
-const RING = 5.6, WALL = 7, EYE = 1.65, BODY = 0.4, CHAMBER = 1.7;
-const stationPos = (i: number) => {
-  const a = Math.PI + (i / LEVEL_COUNT) * Math.PI * 2; // level 1 at the west side, clockwise
-  return { x: Math.cos(a) * RING, z: Math.sin(a) * RING, rot: -a - Math.PI / 2 };
-};
+const CHAMBER = 1.7;
+const MON = new THREE.Vector3(...DESK.monitor), VIEW = new THREE.Vector3(...DESK.view);
+
+/** Monitor / desk: power on the current experiment if its parts are all on the desk. */
+export function powerOn() {
+  const g = useGame.getState(), cur = nextLevel(g.completed);
+  if (!hasSet(g.collected, g.completed, cur)) { play('fail'); return false; }
+  document.exitPointerLock(); play('connect'); g.openLevel(cur); return true;
+}
 
 /** Walks the player and eases the camera between the menu orbit, the hub and the bench close-up. */
 function Rig() {
   const { camera, gl, raycaster, scene } = useThree();
   const keys = useRef(new Set<string>());
-  const look = useRef({ yaw: 0, pitch: -0.08 });
-  const pos = useRef(new THREE.Vector3(0, EYE, 3.2));
+  const look = useRef({ yaw: SPAWN.yaw, pitch: -0.08 });
+  const pos = useRef(new THREE.Vector3(SPAWN.x, EYE, SPAWN.z));
   const target = useRef(new THREE.Vector3());
   const tmp = useMemo(() => new THREE.Vector3(), []);
-  const aimedRef = useRef<number | null>(null);
+  const aimedRef = useRef<string | null>(null);
 
   const aim = () => {
     raycaster.setFromCamera(new THREE.Vector2(0, 0), camera);
     for (const h of raycaster.intersectObjects(scene.children, true)) {
       let o: THREE.Object3D | null = h.object;
-      while (o && o.userData.station === undefined) o = o.parent;
-      if (o) return h.distance < 3.6 ? (o.userData.station as number) : null; // non-console hits (glass, floor rings) never block the aim
+      while (o && o.userData.aim === undefined) o = o.parent;
+      if (o) return h.distance < 3.4 ? (o.userData.aim as string) : null; // un-tagged hits (glass, walls) never block the aim
     }
     return null;
   };
@@ -44,7 +50,7 @@ function Rig() {
     const g = useGame.getState();
     const id = aimedRef.current;
     if (g.screen !== 'hub' || id === null) return;
-    if (isUnlocked(g.completed, id)) { document.exitPointerLock(); play('connect'); g.openLevel(id); } else play('fail');
+    if (id === 'monitor' || id === 'desk') powerOn(); else collect(id);
   };
 
   useEffect(() => {
@@ -67,12 +73,13 @@ function Rig() {
       else activate();
     };
     if ((import.meta as unknown as { env: { DEV: boolean } }).env.DEV) { // test hook: stand `d` metres from console n (1-based), facing it
-      (window as unknown as Record<string, unknown>).__lab = {
-        stand: (n: number, d = 2) => {
-          const p = stationPos(n - 1), r = Math.hypot(p.x, p.z);
-          pos.current.set(p.x * (1 - d / r), EYE, p.z * (1 - d / r));
-          look.current = { yaw: Math.atan2(p.x - pos.current.x, p.z - pos.current.z) + Math.PI, pitch: -0.08 };
+      (window as unknown as Record<string, unknown>).__lab = { // stand(): in front of the desk; stand(id): beside a waiting component
+        stand: (id?: string, d = 1.5) => {
+          const [x, y, z] = id && SPOTS[id] ? SPOTS[id] : DESK.monitor, r = Math.hypot(x, z);
+          pos.current.set(x * (1 - d / r), EYE, z * (1 - d / r));
+          look.current = { yaw: Math.atan2(x - pos.current.x, z - pos.current.z) + Math.PI, pitch: Math.atan2(y - EYE, d) };
         },
+        collect, waiting: () => waiting(useGame.getState()), powerOn,
         view: (x: number, z: number, yaw: number, pitch = -0.05) => { pos.current.set(x, EYE, z); look.current = { yaw, pitch }; },
         aimed: () => useAim.getState().aimed, game: useGame, renderer: gl,
       };
@@ -87,15 +94,17 @@ function Rig() {
     const t = clock.elapsedTime;
     if (g.screen !== 'hub' && document.pointerLockElement) document.exitPointerLock();
 
-    if (g.screen === 'level') { // bench close-up: drift toward the active console
-      const i = g.level - 1, p = stationPos(i);
+    if (g.screen === 'level') { // seated close-up at the desk, eyes on the monitor
       const k = 1 - Math.exp(-3 * dt);
-      tmp.set(p.x * 0.72, 1.55, p.z * 0.72);
-      camera.position.lerp(tmp, k);
-      target.current.lerp(tmp.set(p.x, 1.25, p.z), k);
+      camera.position.lerp(VIEW, k);
+      target.current.lerp(MON, k);
       camera.lookAt(target.current);
       pos.current.copy(camera.position);
       if (aimedRef.current !== null) { aimedRef.current = null; useAim.getState().set(null); }
+      return;
+    }
+    if (g.screen === 'cutscene') { // Intro3D drives the camera; keep the walker where the player will stand at the hand-off
+      pos.current.set(camera.position.x, EYE, camera.position.z); look.current.yaw = camera.rotation.y; look.current.pitch = camera.rotation.x;
       return;
     }
     if (g.screen !== 'hub') { // cinematic orbit behind menus
@@ -119,26 +128,20 @@ function Rig() {
       let nz = pos.current.z + (-Math.cos(yaw) * f - Math.sin(yaw) * s) * sp;
       const r = Math.hypot(nx, nz);
       if (r > WALL - BODY - 0.1) { nx *= (WALL - BODY - 0.1) / r; nz *= (WALL - BODY - 0.1) / r; }
-      if (r < CHAMBER + BODY - 0.2) { const k = (CHAMBER + BODY - 0.2) / Math.max(r, 1e-3); nx *= k; nz *= k; }
-      for (const c of PROPS) { const dx = nx - c.x, dz = nz - c.z, d = Math.hypot(dx, dz); if (d < c.r) { nx = c.x + (dx / d) * c.r; nz = c.z + (dz / d) * c.r; } }
+      for (const c of COLLIDERS) { const dx = nx - c.x, dz = nz - c.z, d = Math.hypot(dx, dz); if (d < c.r) { nx = c.x + (dx / d) * c.r; nz = c.z + (dz / d) * c.r; } }
       for (const c of CHARACTERS) { const dx = nx - c.x, dz = nz - c.z, d = Math.hypot(dx, dz); if (d < 0.6) { nx = c.x + (dx / d) * 0.6; nz = c.z + (dz / d) * 0.6; } }
-      for (let i = 0; i < LEVEL_COUNT; i++) { // console collision: push out of a disc around each console
-        const p = stationPos(i), dx = nx - p.x, dz = nz - p.z, d = Math.hypot(dx, dz);
-        if (d < 0.85) { nx = p.x + (dx / d) * 0.85; nz = p.z + (dz / d) * 0.85; }
-      }
       pos.current.set(nx, EYE + Math.sin(t * 6) * 0.01 * (f || s ? 1 : 0), nz);
     }
     camera.position.lerp(pos.current, 1 - Math.exp(-14 * dt));
     camera.rotation.set(pitch, look.current.yaw, 0, 'YXZ');
 
     let a = aim();
-    if (a === null) { // proximity assist: the nearest console you roughly face within 2.6 m, so aiming never needs pixel precision
+    if (a === null) { // proximity assist: a component or the monitor you roughly face, so aiming never needs pixel precision
       const fx = -Math.sin(look.current.yaw), fz = -Math.cos(look.current.yaw);
-      let best = 2.6;
-      for (let i = 0; i < LEVEL_COUNT; i++) {
-        const p = stationPos(i), dx = p.x - pos.current.x, dz = p.z - pos.current.z, d = Math.hypot(dx, dz);
-        if (d < best && (dx * fx + dz * fz) / d > 0.8) { best = d; a = i + 1; }
-      }
+      let best = 2.2;
+      const near = (x: number, z: number, cos: number) => { const dx = x - pos.current.x, dz = z - pos.current.z, d = Math.hypot(dx, dz); return d < best && (dx * fx + dz * fz) / d > cos ? d : 0; };
+      for (const w of waiting(g)) { const d = near(SPOTS[w.id][0], SPOTS[w.id][2], 0.85); if (d) { best = d; a = w.id; } }
+      if (a === null) { best = 2.8; if (near(DESK.monitor[0], DESK.monitor[2], 0.7)) a = 'monitor'; }
     }
     if (a !== aimedRef.current) { aimedRef.current = a; useAim.getState().set(a); }
   });
@@ -153,12 +156,12 @@ export function Lab({ quality }: { quality: 'low' | 'high' }) {
       <fog attach="fog" args={['#0d0907', 6, 18]} />
       <ambientLight intensity={0.08} color="#ffe2c0" />
       <hemisphereLight args={['#ffd8a8', '#24170e', 0.16]} />
-      <Suspense fallback={null}><Room wall={WALL} ring={RING} chamber={CHAMBER} quality={quality} /></Suspense>
+      <Suspense fallback={null}><Room wall={WALL} chamber={CHAMBER} quality={quality} /></Suspense>
+      <Suspense fallback={null}><Desk /></Suspense>
+      <Pickups />
       <Characters />
       <Chamber open={completed.length >= LEVEL_COUNT} radius={CHAMBER} quality={quality} />
-      {Array.from({ length: LEVEL_COUNT }, (_, i) => (
-        <Station key={i} i={i} pos={stationPos(i)} quality={quality} state={completed.includes(i + 1) ? 'done' : isUnlocked(completed, i + 1) ? 'open' : 'locked'} />
-      ))}
+      <Intro3D />
       <Rig />
     </>
   );

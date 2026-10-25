@@ -3,7 +3,8 @@
 
 export type Sfx =
   | 'click' | 'hover' | 'connect' | 'pulse' | 'fail' | 'success' | 'reveal'
-  | 'complete' | 'meow' | 'photon' | 'measure' | 'stabilize' | 'rescue';
+  | 'complete' | 'meow' | 'photon' | 'measure' | 'stabilize' | 'rescue'
+  | 'tick' | 'heartbeat' | 'thud';
 
 type Kind = 'master' | 'sfx' | 'ambience';
 
@@ -167,6 +168,18 @@ const SOUNDS: Record<Sfx, Snd> = {
   rescue: (c, d, t) => {
     arp(c, d, t, [523, 659, 784, 1047], 0.09, { type: 'triangle', dur: 0.35, peak: 0.15 });
     meow(c, d, t + 0.35);
+  },
+  tick: (c, d, t) => { // clockwork escapement
+    noise(c, d, t, 0.025, 0.12, { type: 'bandpass', freq: 4200, q: 6 });
+    tone(c, d, t, { type: 'square', freqs: [2100, 1900], dur: 0.015, peak: 0.03, filter: { type: 'bandpass', freqs: [2500], q: 3 } });
+  },
+  heartbeat: (c, d, t) => { // lub-dub
+    tone(c, d, t, { freqs: [62, 40], dur: 0.16, peak: 0.45, attack: 0.01, filter: { type: 'lowpass', freqs: [180] } });
+    tone(c, d, t + 0.2, { freqs: [55, 36], dur: 0.14, peak: 0.3, attack: 0.01, filter: { type: 'lowpass', freqs: [160] } });
+  },
+  thud: (c, d, t) => { // a door or the bell jar landing
+    tone(c, d, t, { freqs: [110, 45], dur: 0.35, peak: 0.35, attack: 0.004, filter: { type: 'lowpass', freqs: [400] } });
+    noise(c, d, t, 0.12, 0.08, { type: 'lowpass', freq: 900, q: 0.7 });
   },
 };
 

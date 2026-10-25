@@ -1,22 +1,25 @@
 import { Suspense, useEffect, useMemo, useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
-import { useGLTF } from '@react-three/drei';
+import { Html, useGLTF } from '@react-three/drei';
 import * as THREE from 'three';
 import { clone } from 'three/examples/jsm/utils/SkeletonUtils.js';
+import { nextLevel, useGame } from '../store';
+import { think, useActors, type ActorId, type Arms, type Gesture } from './actors';
 
 /** Who is talking right now; Dialogue writes it, the hub lights that face. */
 export const speaker: { who: string | null } = { who: null };
 
-/** Where the two physicists stand (also used for collision in the walker). */
+const live = (id: ActorId) => useActors.getState().a[id];
+/** The two physicists. x/z are live (the walker collides with them); off-stage actors report a far-away spot. */
 export const CHARACTERS = [
   {
-    id: 'heisenberg', x: 1.7, z: 2.1, photo: '/tex/heisenberg_face.jpg',
+    id: 'heisenberg', get x() { return live('heisenberg').visible ? live('heisenberg').x : 99; }, get z() { return live('heisenberg').z; }, photo: '/tex/heisenberg_face.jpg',
     crop: [58, 28, 186, 292], // ear to ear, crown to chin, in source pixels
     skinAt: [0.5, 0.22], hairAt: [0.5, 0.1], hairline: 0.3, grade: 'saturate(0.78)', nose: [-0.2, 0.17], // bald: "hair" is scalp
     jacket: '#2b2c30', shirt: '#4a1820', trousers: '#8d8068', shoes: '#2a211a', light: '#e4efd8', hem: 0.2,
   },
   {
-    id: 'schrodinger', x: -1.7, z: 2.1, photo: '/tex/schrodinger_face.jpg',
+    id: 'schrodinger', get x() { return live('schrodinger').visible ? live('schrodinger').x : 99; }, get z() { return live('schrodinger').z; }, photo: '/tex/schrodinger_face.jpg',
     crop: [45, 8, 195, 307],
     skinAt: [0.22, 0.6], hairAt: [0.5, 0.05], hairline: 0.6, grade: 'none', nose: [-0.27, 0.17],
     jacket: '#e8e5dc', shirt: '#f6f4ee', trousers: '#2e2f38', shoes: '#1c1a19', light: '#ffe6c4', hem: 0.62,
@@ -195,33 +198,76 @@ function Physicist({ c }: { c: Char }) {
   const faceMat = useMemo(() => new THREE.MeshStandardMaterial({ map: tex.face, emissiveMap: tex.face, emissive: '#ffffff', emissiveIntensity: 0.08, roughness: 0.75 }), [tex]);
   const root = useRef<THREE.Group>(null);
   const light = useRef<THREE.PointLight>(null);
-  const mixer = useMemo(() => new THREE.AnimationMixer(model), [model]);
-  const q = useMemo(() => new THREE.Quaternion(), []);
-  const next = useRef(3 + Math.random() * 4);
-  const yaw = -Math.sign(c.x) * 0.35; // angled slightly inward, toward the player
+  const rig = useMemo(() => {
+    const mixer = new THREE.AnimationMixer(model);
+    const clip = (n: string) => animations.find((a) => a.name === n)!;
+    const base = { idle: mixer.clipAction(clip('idle')), walk: mixer.clipAction(clip('walk')), run: mixer.clipAction(clip('run')) };
+    for (const a of Object.values(base)) a.setEffectiveWeight(0).play();
+    base.idle.setEffectiveWeight(1);
+    // gestures layer on top of the walk/idle as additive clips (as in three's Xbot example)
+    const gest = Object.fromEntries(['agree', 'headShake', 'sad_pose', 'sneak_pose'].map((n) => {
+      const c = THREE.AnimationUtils.makeClipAdditive(clip(n).clone());
+      const a = mixer.clipAction(c);
+      if (/pose/.test(n)) a.setLoop(THREE.LoopRepeat, Infinity); else { a.setLoop(THREE.LoopOnce, 1); a.clampWhenFinished = false; }
+      return [n, a];
+    })) as Record<Exclude<Gesture, null>, THREE.AnimationAction>;
+    const bone = (n: string) => (model.getObjectByName(`mixamorig${n}`) ?? model.getObjectByName(`mixamorig:${n}`))!;
+    const bones = { la: bone('LeftArm'), lf: bone('LeftForeArm'), ra: bone('RightArm'), rf: bone('RightForeArm'), neck: bone('Neck'), head: bone('Head') };
+    return { mixer, base, gest, bones };
+  }, [model, animations]);
+  const st = useRef({ ry: 0, v: 0, px: NaN, pz: 0, gesture: null as Gesture, armW: 0, arms: null as Arms, gaze: 0 });
   const headObj = followers[followers.length - 1].obj;
 
-  useEffect(() => {
-    const idle = mixer.clipAction(animations.find((a) => a.name === 'idle')!).play();
-    return () => { idle.stop(); mixer.stopAllAction(); };
-  }, [mixer, animations]);
+  useEffect(() => () => { rig.mixer.stopAllAction(); }, [rig]);
 
-  useFrame((_, dt) => {
-    mixer.update(dt);
-    next.current -= dt;
-    if (next.current < 0) { // an occasional gesture, then back to idle
-      next.current = 6 + Math.random() * 6;
-      const a = mixer.clipAction(animations.find((x) => x.name === (c.id === 'heisenberg' ? 'headShake' : 'agree'))!);
-      a.reset().setLoop(THREE.LoopOnce, 1).fadeIn(0.3).play(); a.clampWhenFinished = false;
-      setTimeout(() => a.fadeOut(0.4), 1800);
+  useFrame((_, rawDt) => {
+    const scr = useGame.getState().screen;
+    if (scr === 'level' || scr === 'sandbox' || !root.current) return; // off camera: no animation work at all
+    const dt = Math.min(rawDt, 0.1), a = useActors.getState().a[c.id], s = st.current, g = root.current;
+    g.visible = a.visible;
+    if (!a.visible) { s.px = NaN; return; }
+    // facing: turn smoothly (rate-limited) toward the wanted yaw
+    let dy = a.yaw - s.ry; dy = Math.atan2(Math.sin(dy), Math.cos(dy));
+    s.ry += THREE.MathUtils.clamp(dy * Math.min(1, dt * 7), -6 * dt, 6 * dt);
+    a.ry = s.ry;
+    g.position.set(a.x, 0, a.z); g.rotation.y = s.ry;
+    // measured ground speed drives the idle / walk / run blend (works for scripted and AI motion alike)
+    const moved = Number.isNaN(s.px) ? 0 : Math.hypot(a.x - s.px, a.z - s.pz);
+    s.px = a.x; s.pz = a.z;
+    s.v += (Math.min(5, moved / Math.max(dt, 1e-3)) - s.v) * Math.min(1, dt * 8);
+    const v = s.v, run = THREE.MathUtils.clamp((v - 1.7) / 1.0, 0, 1), walk = THREE.MathUtils.clamp(v / 0.5, 0, 1) - run;
+    rig.base.idle.setEffectiveWeight(1 - walk - run);
+    rig.base.walk.setEffectiveWeight(walk).setEffectiveTimeScale(THREE.MathUtils.clamp(v / 1.25, 0.5, 1.6));
+    rig.base.run.setEffectiveWeight(run).setEffectiveTimeScale(THREE.MathUtils.clamp(v / 3.3, 0.7, 1.4));
+    if (a.gesture !== s.gesture) { // start / stop a gesture layer
+      if (s.gesture) rig.gest[s.gesture].fadeOut(0.35);
+      if (a.gesture) rig.gest[a.gesture].reset().setEffectiveWeight(1).fadeIn(0.25).play();
+      s.gesture = a.gesture;
     }
-    if (root.current) { // clothes and head follow their bones' pose (bones carry the armature's 0.01 scale, so copy pose only)
-      model.updateMatrixWorld(true);
-      const inv = root.current.getWorldQuaternion(q).clone().invert();
-      for (const f of followers) {
-        f.bone.getWorldPosition(f.obj.position); root.current.worldToLocal(f.obj.position);
-        f.obj.quaternion.copy(inv).multiply(f.bone.getWorldQuaternion(q)).multiply(f.rest);
-      }
+    rig.mixer.update(dt);
+
+    // procedural overrides on top of the clips: arms (carry / reach / low) and head gaze
+    if (a.arms) s.arms = a.arms;
+    s.armW += ((a.arms ? 1 : 0) - s.armW) * Math.min(1, dt * 6);
+    if (s.armW > 0.01 && s.arms) {
+      const pose = POSES[s.arms];
+      aim(rig.bones.la, pose[0], g.quaternion, s.armW); aim(rig.bones.lf, pose[1], g.quaternion, s.armW);
+      aim(rig.bones.ra, pose[2], g.quaternion, s.armW); aim(rig.bones.rf, pose[3], g.quaternion, s.armW);
+    }
+    let want = 0;
+    if (a.look) {
+      const rel = Math.atan2(a.lx - a.x, a.lz - a.z) - s.ry, r = Math.atan2(Math.sin(rel), Math.cos(rel));
+      want = Math.abs(r) < 2.2 ? THREE.MathUtils.clamp(r, -1.05, 1.05) : 0;
+    }
+    s.gaze += (want - s.gaze) * Math.min(1, dt * 4);
+    if (Math.abs(s.gaze) > 0.01) { turn(rig.bones.neck, s.gaze * 0.4); turn(rig.bones.head, s.gaze * 0.6); }
+
+    // clothes and head follow their bones' pose (bones carry the armature's 0.01 scale, so copy pose only)
+    model.updateMatrixWorld(true);
+    const inv = g.getWorldQuaternion(qInv).invert();
+    for (const f of followers) {
+      f.bone.getWorldPosition(f.obj.position); g.worldToLocal(f.obj.position);
+      f.obj.quaternion.copy(inv).multiply(f.bone.getWorldQuaternion(qTmp)).multiply(f.rest);
     }
     const on = speaker.who === c.id, k = 1 - Math.exp(-6 * dt);
     faceMat.emissiveIntensity += ((on ? 0.4 : 0.08) - faceMat.emissiveIntensity) * k;
@@ -230,7 +276,7 @@ function Physicist({ c }: { c: Char }) {
 
   const Y = 0.095; // head centre above the head bone
   return (
-    <group ref={root} position={[c.x, 0, c.z]} rotation-y={yaw}>
+    <group ref={root}>
       <primitive object={model} />
       <primitive object={clothes} />
       <primitive object={headObj}>
@@ -243,7 +289,47 @@ function Physicist({ c }: { c: Char }) {
         {c.id === 'heisenberg' && <Hat y={Y} />}
       </primitive>
       <pointLight ref={light} position={[0, 2.1, 0.9]} intensity={2.5} distance={3.5} color={c.light} />
+      <Bubble id={c.id} />
     </group>
+  );
+}
+
+const qInv = new THREE.Quaternion(), qTmp = new THREE.Quaternion(), qP = new THREE.Quaternion(), qW = new THREE.Quaternion(), qR = new THREE.Quaternion();
+const vTmp = new THREE.Vector3(), vDir = new THREE.Vector3(), UP = new THREE.Vector3(0, 1, 0);
+const n = (x: number, y: number, z: number) => new THREE.Vector3(-x, y, z).normalize(); // TEST flip
+/** Arm poses as bone directions in the body frame (+z forward, +x the character's left): [L upper, L fore, R upper, R fore]. */
+const POSES: Record<Exclude<Arms, null>, THREE.Vector3[]> = {
+  carry: [n(0.3, -0.75, 0.45), n(-0.6, 0.25, 0.75), n(-0.3, -0.75, 0.45), n(0.6, 0.25, 0.75)],
+  reach: [n(0.12, -0.3, 1), n(0.04, -0.05, 1), n(-0.12, -0.3, 1), n(-0.04, -0.05, 1)],
+  low: [n(0.12, -0.75, 0.65), n(-0.05, -0.85, 0.5), n(-0.12, -0.75, 0.65), n(0.05, -0.85, 0.5)],
+};
+/** Blend a bone so its +y (Mixamo bones point down the limb along +y) aims along `dir` (body frame, rotated by `body`). */
+function aim(b: THREE.Object3D, dir: THREE.Vector3, body: THREE.Quaternion, w: number) {
+  b.getWorldQuaternion(qW);
+  qR.setFromUnitVectors(vTmp.copy(UP).applyQuaternion(qW), vDir.copy(dir).applyQuaternion(body));
+  qW.premultiply(qR);
+  b.parent!.getWorldQuaternion(qP).invert();
+  b.quaternion.slerp(qP.multiply(qW), w);
+}
+/** Turn a bone by `ang` about the world vertical (head/neck gaze). */
+function turn(b: THREE.Object3D, ang: number) {
+  b.getWorldQuaternion(qW).premultiply(qR.setFromAxisAngle(UP, ang));
+  b.parent!.getWorldQuaternion(qP).invert();
+  b.quaternion.copy(qP.multiply(qW));
+}
+
+/** Speech bubble over an actor's head (hub only; cutscene lines use the caption box). */
+function Bubble({ id }: { id: ActorId }) {
+  const speech = useActors((s) => s.a[id].speech);
+  const hub = useGame((s) => s.screen === 'hub');
+  if (!speech || !hub) return null;
+  return (
+    <Html position={[0, 2.25, 0]} center zIndexRange={[15, 10]} style={{ pointerEvents: 'none' }}>
+      <div className={`bubble bubble-${id}`} key={speech.text}>
+        <b>{id === 'heisenberg' ? 'Heisenberg' : 'Schrödinger'}</b>
+        {speech.text}
+      </div>
+    </Html>
   );
 }
 
@@ -261,6 +347,16 @@ function Hat({ y }: { y: number }) {
 
 useGLTF.preload('/models/Xbot.glb');
 
+/** Hub AI: runs only while the player walks the lab. */
+function Brains() {
+  useFrame(({ camera }, dt) => {
+    const g = useGame.getState();
+    if (g.screen !== 'hub') return;
+    think(Math.min(dt, 0.1), { x: camera.position.x, z: camera.position.z, yaw: camera.rotation.y }, nextLevel(g.completed), !!g.panel || speaker.who !== null);
+  });
+  return null;
+}
+
 export function Characters() {
-  return <Suspense fallback={null}>{CHARACTERS.map((c) => <Physicist key={c.id} c={c} />)}</Suspense>;
+  return <><Brains /><Suspense fallback={null}>{CHARACTERS.map((c) => <Physicist key={c.id} c={c} />)}</Suspense></>;
 }

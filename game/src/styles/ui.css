@@ -96,7 +96,66 @@ kbd { font-family: var(--font-mono); font-size: 12px; background: var(--bg); bor
 .bench { display: grid; gap: 16px; align-items: start; }
 .bench-col { display: grid; gap: 12px; align-content: start; }
 @media (max-width: 900px) { .bench { grid-template-columns: minmax(0, 1fr) !important; } }
-.lvl { background: var(--bg); }
-.lvl-body { background: var(--surface); backdrop-filter: none; }
+/* Level screen: you are seated at the desk, so the study stays visible through a dark frosted pane. */
+.lvl { background: radial-gradient(ellipse at 50% 45%, rgba(8,10,18,.25), rgba(6,7,12,.7)); }
+.lvl-body { background: rgba(18,24,38,.72); backdrop-filter: blur(8px) saturate(.85); }
 select, input[type=range] { font: inherit; }
 select { background: var(--surface-2); color: var(--text); border: 1px solid var(--edge); border-radius: 6px; padding: 6px 8px; }
+
+/* Photo portraits: brass ring over walnut, sepia grading, vignette */
+.portrait { position: relative; flex: none; border-radius: 50% / 46%; padding: 5%;
+  background: linear-gradient(145deg, #e6c27a, #8a6a2c 45%, #d9b266 70%, #6e5220);
+  box-shadow: 0 2px 8px rgba(0,0,0,.55), inset 0 0 0 1px rgba(255,235,180,.35); }
+.portrait-in { position: relative; width: 100%; height: 100%; border-radius: 50% / 46%; overflow: hidden;
+  background: #2a1a10; box-shadow: 0 0 0 3px #3b2414, inset 0 0 6px #000; }
+.portrait-in img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 12%; display: block; }
+.portrait-schrodinger img { filter: grayscale(1) sepia(.35) contrast(1.05) brightness(1.05); object-position: 50% 28%; }
+.portrait-heisenberg img { filter: sepia(.55) saturate(.8) contrast(1.05) brightness(.95); transform: scale(1.15); transform-origin: 50% 25%; object-position: 50% 8%; }
+.portrait-in::after { content: ''; position: absolute; inset: 0; pointer-events: none;
+  background: radial-gradient(ellipse at 50% 45%, transparent 55%, rgba(20,10,0,.55) 100%); }
+.portrait-narrator .portrait-in { background: #1a1410; }
+.portrait-pulse { position: absolute; top: 2%; right: 2%; width: 10px; height: 10px; border-radius: 50%; animation: portrait-pulse 1.2s ease-in-out infinite; }
+@keyframes portrait-pulse { 0%, 100% { opacity: .35; transform: scale(.8); } 50% { opacity: 1; transform: scale(1.25); } }
+@media (prefers-reduced-motion: reduce) { .portrait-pulse { animation: none; } }
+
+/* Hub: component checklist and collection notices */
+.hud-col { display: grid; gap: 8px; justify-items: start; align-content: start; }
+.checklist { padding: 10px 14px; max-width: min(340px, calc(100vw - 32px)); font-size: 13px; }
+.checklist .cl-head { font-family: var(--font-title); font-size: 15px; color: var(--amber); margin-bottom: 6px; }
+.checklist ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.checklist li { display: grid; grid-template-columns: 16px 1fr; gap: 6px; }
+.checklist li > span { color: var(--muted); }
+.checklist li.have { color: var(--muted); }
+.checklist li.have > span { color: var(--amber); }
+.checklist small { display: block; color: var(--muted); font-style: italic; font-size: 12px; margin-top: 1px; }
+.checklist .cl-foot { margin-top: 8px; color: var(--cyan); font-size: 12px; }
+.toast { position: absolute; left: 0; right: 0; margin: 0 auto; width: fit-content; top: 18%; padding: 10px 18px; text-align: center; max-width: min(520px, calc(100vw - 32px)); border-color: rgba(244,184,96,.5); }
+.toast b { color: var(--amber); font-weight: 500; }
+.toast-sub { margin-top: 4px; font-size: 14px; color: var(--text); font-style: italic; }
+
+/* opening cutscene (src/ui/Cutscene.tsx) */
+.cut { position: absolute; inset: 0; z-index: 18; pointer-events: none; }
+.cut > .btn, .cut > .dlg { pointer-events: auto; }
+.cut-bars::before, .cut-bars::after { content: ''; position: absolute; left: 0; right: 0; height: 7vh; background: #050302; animation: cut-bar 0.9s var(--ease-out) both; }
+.cut-bars::before { top: 0; transform-origin: top; }
+.cut-bars::after { bottom: 0; transform-origin: bottom; }
+@keyframes cut-bar { from { transform: scaleY(0); } }
+.cut-fade { position: absolute; inset: 0; background: #000; animation: cut-fade 1.6s ease-out 0.2s both; }
+@keyframes cut-fade { from { opacity: 1; } to { opacity: 0; } }
+.cut-panic { position: absolute; inset: 0; opacity: 0; transition: opacity 0.6s; background: radial-gradient(ellipse at center, transparent 45%, rgba(150, 14, 10, 0.55) 100%); }
+.cut-panic.on { opacity: 1; animation: cut-pulse 0.72s ease-in-out infinite; }
+@keyframes cut-pulse { 0%, 100% { opacity: 0.55; } 18% { opacity: 1; } 40% { opacity: 0.7; } 52% { opacity: 0.95; } }
+.cut-skip { position: absolute; top: calc(7vh + 12px); right: 16px; }
+.cut-cap { bottom: calc(7vh + 14px); cursor: pointer; }
+.cut-cap.narr .txt { color: #e9dcc0; }
+@media (prefers-reduced-motion: reduce) { .cut-panic.on { animation: none; opacity: 0.8; } .cut-bars::before, .cut-bars::after, .cut-fade { animation-duration: 0.01s; } }
+
+/* hub speech bubbles over the physicists (src/lab/Characters.tsx) */
+.bubble { position: relative; transform: translateY(-50%); width: max-content; max-width: min(300px, 70vw); padding: 8px 12px 9px; border-radius: 10px; font-size: 14px; line-height: 1.4; color: var(--text);
+  background: rgba(20, 13, 8, 0.88); border: 1px solid rgba(244, 184, 96, 0.45); box-shadow: 0 8px 24px -10px rgba(0, 0, 0, 0.8); animation: bubble-in 0.28s var(--ease-out) both; }
+.bubble b { display: block; font-family: var(--font-title); font-weight: 400; font-size: 13px; color: var(--amber); margin-bottom: 1px; }
+.bubble-heisenberg { border-color: rgba(240, 107, 115, 0.5); }
+.bubble-heisenberg b { color: var(--red); }
+.bubble::after { content: ''; position: absolute; left: 50%; bottom: -7px; width: 12px; height: 12px; background: inherit; border: inherit; border-top: 0; border-left: 0; transform: translateX(-50%) rotate(45deg); }
+@keyframes bubble-in { from { opacity: 0; transform: translateY(-40%) scale(0.96); } }
+.hud-top { align-items: flex-start; }
