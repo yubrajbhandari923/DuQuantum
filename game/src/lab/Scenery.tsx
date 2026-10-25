@@ -5,12 +5,13 @@ import * as THREE from 'three';
 import { Prop } from './Components';
 import { APO, PANEL, SIDES, STEP, faceIn, gap, onPanel, polar } from './layout';
 import { DoorSwing } from './Door';
+import { asset } from '../asset';
 
 /**
  * A 1930s-50s physicist's study built from the "Modular Vintage Living Room" kit (Sketchfab, user-supplied, see ASSET_SOURCES.md),
  * split into recentred pieces in /models/vintage/kit.glb (each piece sits on y=0, centred on x/z).
  */
-const KIT = '/models/vintage/kit.glb';
+const KIT = asset('models/vintage/kit.glb');
 const H = 4.78;
 
 type Kit = Record<string, THREE.Mesh>;
@@ -80,7 +81,7 @@ function Flame(props: JSX.IntrinsicElements['group']) {
 
 /** Period glassware from the low-poly lab set, authored at roughly 15x scale. */
 function Glass({ n, scale = 0.09, ...rest }: { n: string; scale?: number } & JSX.IntrinsicElements['group']) {
-  const { nodes } = useGLTF('/models/vintage/glassware.glb');
+  const { nodes } = useGLTF(asset('models/vintage/glassware.glb'));
   const obj = useMemo(() => nodes[n].clone(), [nodes, n]);
   return <group scale={scale} {...rest}><primitive object={obj} /></group>;
 }
@@ -175,11 +176,11 @@ function Door() {
 const PANELS: Record<number, JSX.Element> = {
   0: <Piece n="bookcase" position={[0, 0, 0.4]} />,
   1: <><Piece n="armchair" position={[-0.6, 0, 0.75]} rotation-y={0.35} /><Piece n="coffee" position={[0.55, 0, 0.6]} rotation-y={Math.PI / 2} />
-    <Piece n="tablelamp" position={[0.55, 0.62, 0.45]} /><Model url="/models/vintage/phone.glb" position={[0.5, 0.62, 0.95]} rotation-y={-0.4} scale={0.09} /><Piece n="paintA" position={[0, 1.9, 0.03]} /></>,
+    <Piece n="tablelamp" position={[0.55, 0.62, 0.45]} /><Model url={asset('models/vintage/phone.glb')} position={[0.5, 0.62, 0.95]} rotation-y={-0.4} scale={0.09} /><Piece n="paintA" position={[0, 1.9, 0.03]} /></>,
   2: <><Piece n="fireplace" position={[0, 0, 0.52]} /><Fire /></>,
   3: <Window />,
   4: <Piece n="bookcase" position={[0, 0, 0.4]} />,
-  5: <><Model url="/models/vintage/lab_cabinet.glb" position={[-0.65, 0, 0.25]} /><Model url="/models/vintage/lab_cabinet.glb" position={[0.65, 0, 0.25]} />
+  5: <><Model url={asset('models/vintage/lab_cabinet.glb')} position={[-0.65, 0, 0.25]} /><Model url={asset('models/vintage/lab_cabinet.glb')} position={[0.65, 0, 0.25]} />
     <Glass n="tubes" position={[-0.6, 1.8, 0.25]} /><Glass n="beaker" position={[0.7, 1.8, 0.25]} />
     <Glass n="smallBeaker" position={[-0.8, 0.98, 0.3]} /><Glass n="flask" position={[-0.45, 0.98, 0.3]} scale={0.18} /><Glass n="beaker" position={[0.6, 1.36, 0.3]} /><Glass n="tubes" position={[0.75, 0.6, 0.3]} /></>,
   6: <><Piece n="table" position={[0, 0, 0.55]} scale={0.78} /><Prop model="typewriter-underwood" position={[-0.35, 0.72, 0.55]} rotation-y={0.25} /><Piece n="tablelamp" position={[0.45, 0.72, 0.45]} />
@@ -230,7 +231,7 @@ export function Room({ wall, chamber, quality = 'high' }: { wall: number; chambe
 
   return (
     <>
-      <Environment files="/tex/studio.hdr" environmentIntensity={0.12} />
+      <Environment files={asset('tex/studio.hdr')} environmentIntensity={0.12} />
 
       {/* floor boards, a big rug under the chamber */}
       <mesh rotation-x={-Math.PI / 2} material={floorMat} receiveShadow><circleGeometry args={[wall, 40]} /></mesh>
@@ -269,7 +270,7 @@ export function Room({ wall, chamber, quality = 'high' }: { wall: number; chambe
         const [x, z] = k ? polar(gap(k) + STEP / 2, 4.3) : polar(gap(0), 4.75); // the first hangs over the desk
         return (
           <group key={k}>
-            <Model url="/models/lab/hanging_industrial_lamp.glb" position={[x, H - 0.3, z]} />
+            <Model url={asset('models/lab/hanging_industrial_lamp.glb')} position={[x, H - 0.3, z]} />
             {(!low || j % 2 === 0) && <DownSpot position={[x, H - 1.65, z]} color="#ffb36a" intensity={18} angle={0.95} />}
           </group>
         );
@@ -302,4 +303,4 @@ export function Room({ wall, chamber, quality = 'high' }: { wall: number; chambe
 }
 
 useGLTF.preload(KIT);
-for (const u of ['/models/vintage/lab_cabinet.glb', '/models/vintage/glassware.glb', '/models/vintage/phone.glb', '/models/lab/hanging_industrial_lamp.glb']) useGLTF.preload(u);
+for (const u of ['models/vintage/lab_cabinet.glb', 'models/vintage/glassware.glb', 'models/vintage/phone.glb', 'models/lab/hanging_industrial_lamp.glb']) useGLTF.preload(asset(u));

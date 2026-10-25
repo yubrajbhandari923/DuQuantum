@@ -11,10 +11,11 @@ import { ComponentModel, Prop, walnut } from './Components';
 import { PICK_SCALE, flying, roman, waiting } from './Pickups';
 import { W as PW, drawPreview } from './screens';
 import { Piece } from './Scenery';
+import { asset } from '../asset';
 
 /** The hero desk: a walnut pedestal desk with a green leather top, a banker's lamp, the terminal (the monitor that opens the
  *  experiments), the oscilloscope (live preview of the current experiment) and a ten-compartment parts case at the front. */
-const TERM = '/models/vintage/terminal.glb', SCOPE = '/models/vintage/oscilloscope.glb';
+const TERM = asset('models/vintage/terminal.glb'), SCOPE = asset('models/vintage/oscilloscope.glb');
 const TOP = DESK.top, HW = DESK.w / 2, HD = DESK.d / 2;
 const TERM_S = 1.45, TERM_Z = -0.08; // terminal placement; its screen centre is DESK.monitor
 const PART_S = 0.13; // parts in the case
@@ -26,7 +27,7 @@ const BOOK = ['#5a1a16', '#1d2a44', '#3b4a22', '#6b4a1e', '#2a1a12'].map((c) => 
 
 /** Walnut from the bench texture set, tinted dark. */
 function useWood() {
-  const [d, r, n] = useLoader(THREE.TextureLoader, ['/tex/bench_diff.jpg', '/tex/bench_rough.jpg', '/tex/bench_nor.jpg']);
+  const [d, r, n] = useLoader(THREE.TextureLoader, ['tex/bench_diff.jpg', 'tex/bench_rough.jpg', 'tex/bench_nor.jpg'].map(asset));
   return useMemo(() => {
     d.colorSpace = THREE.SRGBColorSpace;
     for (const t of [d, r, n]) { t.wrapS = t.wrapT = THREE.RepeatWrapping; t.anisotropy = 4; }

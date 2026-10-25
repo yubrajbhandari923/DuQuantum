@@ -10,3 +10,4 @@ wheels/
 .venv
 # Playwright CLI output (may contain credentials)
 .playwright-cli/
+.playwright-mcp/

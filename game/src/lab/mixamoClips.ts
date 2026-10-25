@@ -1,5 +1,6 @@
 import { useGLTF } from '@react-three/drei';
 import type * as THREE from 'three';
+import { asset } from '../asset';
 
 /**
  * Mixamo clips retargeted to the Xbot rig (bone names `mixamorigHips`...), from /anims/mixamo.glb.
@@ -9,8 +10,8 @@ import type * as THREE from 'three';
  * Regenerate with `node scripts/convert-mixamo.mjs`.
  */
 export function useMixamoClips(): Record<string, THREE.AnimationClip> {
-  const { animations } = useGLTF('/anims/mixamo.glb');
+  const { animations } = useGLTF(asset('anims/mixamo.glb'));
   return Object.fromEntries(animations.map((a) => [a.name, a]));
 }
 
-useGLTF.preload('/anims/mixamo.glb');
+useGLTF.preload(asset('anims/mixamo.glb'));

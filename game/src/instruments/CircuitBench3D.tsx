@@ -7,6 +7,7 @@ import { play } from '../audio/sfx';
 import { useGame } from '../store';
 import type { Part, Slot } from './CircuitBench';
 import { M, PartModel } from './parts3d';
+import { asset } from '../asset';
 
 interface Props {
   parts: Part[]; slots: Slot[]; wires: [string, string][];
@@ -147,7 +148,7 @@ export function CircuitBench3D({ parts, slots, wires, placed, onPlace, notice }:
             minPolarAngle={0.55} maxPolarAngle={0.95} minAzimuthAngle={-0.35} maxAzimuthAngle={0.35} />
           <Lights low={low} />
           <Suspense fallback={null}>
-            <Environment files="/tex/studio.hdr" environmentIntensity={0.55} />
+            <Environment files={asset('tex/studio.hdr')} environmentIntensity={0.55} />
             <Table />
             <ContactShadows position-y={0.002} scale={[9, 7]} blur={2.2} far={1.2} opacity={0.75} resolution={low ? 256 : 512} frames={24} key={JSON.stringify(placed)} />
           </Suspense>
@@ -235,7 +236,7 @@ const tiled = (t: THREE.Texture, rx: number, ry: number, srgb: boolean) => {
 
 /** Worn wooden bench top (Poly Haven Wood Table Worn) with a green baize blotter along the front for the parts tray. */
 function Table() {
-  const [bd, br, bn] = useLoader(THREE.TextureLoader, ['/tex/bench_diff.jpg', '/tex/bench_rough.jpg', '/tex/bench_nor.jpg']);
+  const [bd, br, bn] = useLoader(THREE.TextureLoader, ['tex/bench_diff.jpg', 'tex/bench_rough.jpg', 'tex/bench_nor.jpg'].map(asset));
   useMemo(() => { tiled(bd, 1.6, 1.1, true); tiled(br, 1.6, 1.1, false); tiled(bn, 1.6, 1.1, false); }, [bd, br, bn]);
   return <>
     <mesh position={[0, -0.12, 0.45]} receiveShadow><boxGeometry args={[9, 0.24, 6.4]} />

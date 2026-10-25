@@ -7,6 +7,7 @@ import { useGame } from '../store';
 import { C } from '../styles/colors';
 import { useActors } from './actors';
 import { BombDevice } from './Bomb';
+import { asset } from '../asset';
 
 type Mats = Record<'fur' | 'white', THREE.Material>;
 function Tail({ i, refs, mats }: { i: number; refs: React.MutableRefObject<(THREE.Group | null)[]>; mats: Mats }) {
@@ -61,9 +62,9 @@ function Cat({ ghost = false, walk }: { ghost?: boolean; walk: React.MutableRefO
   );
 }
 
-const CAT = '/models/cat.glb';
+const CAT = asset('models/cat.glb');
 const BICOLOR_YAW = 0;
-const BICOLOR = '/models/sketchfab/bicolor_cat.glb';
+const BICOLOR = asset('models/sketchfab/bicolor_cat.glb');
 
 /** Real animated cat: Idle while caged, Walk while leaving. Normalised to ~0.8 long, feet at y=0. */
 function CatGLB({ url, yaw = 0, ghost, walk }: { url: string; yaw?: number; ghost: boolean; walk: React.MutableRefObject<number> }) {

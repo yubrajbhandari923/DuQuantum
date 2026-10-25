@@ -3,6 +3,7 @@ import { useGLTF } from '@react-three/drei';
 import * as THREE from 'three';
 import { M, PartModel, glow } from '../instruments/parts3d';
 import type { Glyph } from '../instruments/CircuitBench';
+import { asset } from '../asset';
 
 /** Collectible apparatus, one model per FETCH id. Same scale and frame as PartModel: ~0.9 x 0.5 footprint, on y = 0, front +z. */
 type Kind = Glyph | 'toroid' | 'valve' | 'knob' | 'case';
@@ -19,7 +20,7 @@ const PROP: Record<string, string> = {
   'l3-pulse-box': 'vacuum-tube-instruments', 'l4-drive': 'radio-bush-dac10', 'l5-wigner-lens': 'microscope',
   'l6-parity-meter': 'voltmeter-rusty', 'l9-bias-gauge': 'voltmeter-rusty',
 };
-export const propUrl = (id: string) => `/models/props/${id}.glb`;
+export const propUrl = (id: string) => asset(`models/props/${id}.glb`);
 
 /** One prop at real size (or `fit`: scaled so its larger footprint side is `fit`). Clones share geometry and materials. */
 export function Prop({ model, fit, ...rest }: { model: string; fit?: number } & JSX.IntrinsicElements['group']) {

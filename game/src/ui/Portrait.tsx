@@ -1,5 +1,6 @@
 import type { CharacterId, Mood } from '../types';
 import { C } from '../styles/colors';
+import { asset } from '../asset';
 
 const NAMES: Record<CharacterId, string> = {
   schrodinger: 'Schrödinger',
@@ -8,8 +9,8 @@ const NAMES: Record<CharacterId, string> = {
 };
 
 const PHOTO: Partial<Record<CharacterId, string>> = {
-  schrodinger: '/tex/schrodinger_face.jpg',
-  heisenberg: '/tex/heisenberg_face.jpg',
+  schrodinger: asset('tex/schrodinger_face.jpg'),
+  heisenberg: asset('tex/heisenberg_face.jpg'),
 };
 
 /** Non-photo emblem: a note with a quill. */

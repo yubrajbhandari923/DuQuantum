@@ -5,6 +5,7 @@ import * as THREE from 'three';
 import { clone } from 'three/examples/jsm/utils/SkeletonUtils.js';
 import { nextLevel, useGame } from '../store';
 import { think, useActors, type ActorId, type Arms, type Gesture } from './actors';
+import { asset } from '../asset';
 
 /** Who is talking right now; Dialogue writes it, the hub lights that face. */
 export const speaker: { who: string | null } = { who: null };
@@ -13,13 +14,13 @@ const live = (id: ActorId) => useActors.getState().a[id];
 /** The two physicists. x/z are live (the walker collides with them); off-stage actors report a far-away spot. */
 export const CHARACTERS = [
   {
-    id: 'heisenberg', get x() { return live('heisenberg').visible ? live('heisenberg').x : 99; }, get z() { return live('heisenberg').z; }, photo: '/tex/heisenberg_face.jpg',
+    id: 'heisenberg', get x() { return live('heisenberg').visible ? live('heisenberg').x : 99; }, get z() { return live('heisenberg').z; }, photo: asset('tex/heisenberg_face.jpg'),
     crop: [58, 28, 186, 292], // ear to ear, crown to chin, in source pixels
     skinAt: [0.5, 0.22], hairAt: [0.5, 0.1], hairline: 0.3, grade: 'saturate(0.78)', nose: [-0.2, 0.17], // bald: "hair" is scalp
     jacket: '#2b2c30', shirt: '#4a1820', trousers: '#8d8068', shoes: '#2a211a', light: '#e4efd8', hem: 0.2,
   },
   {
-    id: 'schrodinger', get x() { return live('schrodinger').visible ? live('schrodinger').x : 99; }, get z() { return live('schrodinger').z; }, photo: '/tex/schrodinger_face.jpg',
+    id: 'schrodinger', get x() { return live('schrodinger').visible ? live('schrodinger').x : 99; }, get z() { return live('schrodinger').z; }, photo: asset('tex/schrodinger_face.jpg'),
     crop: [45, 8, 195, 307],
     skinAt: [0.22, 0.6], hairAt: [0.5, 0.05], hairline: 0.6, grade: 'none', nose: [-0.27, 0.17],
     jacket: '#e8e5dc', shirt: '#f6f4ee', trousers: '#2e2f38', shoes: '#1c1a19', light: '#ffe6c4', hem: 0.62,
@@ -146,7 +147,7 @@ const SEGMENTS: [string, string, number, number, number, Part][] = [
 type Follower = { bone: THREE.Object3D; rest: THREE.Quaternion; obj: THREE.Object3D };
 
 function Physicist({ c }: { c: Char }) {
-  const { scene, animations } = useGLTF('/models/Xbot.glb');
+  const { scene, animations } = useGLTF(asset('models/Xbot.glb'));
   const skin = useMemo(() => new THREE.Color('#c99a80'), []);
   const { model, clothes, followers, recolour, skinMat } = useMemo(() => {
     const model = clone(scene);
@@ -345,7 +346,7 @@ function Hat({ y }: { y: number }) {
   );
 }
 
-useGLTF.preload('/models/Xbot.glb');
+useGLTF.preload(asset('models/Xbot.glb'));
 
 /** Hub AI: runs only while the player walks the lab. */
 function Brains() {

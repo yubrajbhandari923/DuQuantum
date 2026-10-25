@@ -9,10 +9,16 @@ A browser game: walk a 3D laboratory, step up to ten consoles, and run ten exper
 ```bash
 cd game
 npm install
-npm run dev        # http://localhost:5173
+npm run dev        # http://localhost:5173/DuQuantum/
 npm run build      # typecheck + production build into game/dist
 npm test           # vitest: physics and level-mission tests
 ```
+
+## GitHub Pages
+
+The workflow in `.github/workflows/pages.yml` builds and publishes the game when `game/` changes on `master`. In the repository's **Settings → Pages**, set **Build and deployment → Source** to **GitHub Actions**. The site URL is `https://yubrajbhandari923.github.io/DuQuantum/`.
+
+GitHub Pages serves static files, so the live Ask Schrödinger chat and speech endpoints need a separate backend to work online. The scripted voice lines and the rest of the game work without one. Keep API keys out of the Pages build and repository.
 
 ## Ask Schrödinger (tutor and voices)
 
