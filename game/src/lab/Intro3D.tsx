@@ -160,6 +160,7 @@ export function CutsceneCamera() {
   const { camera } = useThree();
   const cur = useRef(new THREE.Vector3()), want = useMemo(() => new THREE.Vector3(), []), last = useRef(-1);
   useFrame(({ clock }, dt) => {
+    if (useGame.getState().screen !== 'cutscene') return; // handed off: the hub rig owns the camera even if this unmounts a frame late
     const t = intro.t, cam = camera as THREE.PerspectiveCamera;
     if (intro.cam) { cam.position.set(intro.cam[0], intro.cam[1], intro.cam[2]); cam.lookAt(intro.cam[3], intro.cam[4], intro.cam[5]); return; }
     focus(t, want);
@@ -228,6 +229,7 @@ function Director() {
     }
   }, []);
   useFrame((_, dt) => {
+    if (useGame.getState().screen !== 'cutscene') return;
     if (intro.skip) { intro.skip = false; intro.t = INTRO_END; }
     const prev = intro.t;
     if (!paused.current) intro.t += Math.min(dt, 0.1);

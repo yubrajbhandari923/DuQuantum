@@ -5,7 +5,7 @@ import { INTRO, ENDING, LEVELS } from '../src/story/content.ts';
 import { TAUNTS, BARKS, SCHRO_HINTS, ARRIVAL } from '../src/story/barks.ts';
 import { INTRO_BEATS } from '../src/story/intro.ts';
 import { voiceKey } from '../src/audio/voiceKey.ts';
-import { VOICES } from '../server/tutor.ts';
+import { VOICES } from '../server/handlers.ts';
 
 const DIR = new URL('../public/voice/', import.meta.url).pathname;
 const env = Object.fromEntries(fs.readFileSync(new URL('../.env.local', import.meta.url), 'utf8').split('\n').filter((l) => l.includes('=')).map((l) => [l.slice(0, l.indexOf('=')), l.slice(l.indexOf('=') + 1).trim()]));

@@ -33,6 +33,8 @@ jobs:
         working-directory: game
       - run: npm run build
         working-directory: game
+        env:
+          VITE_BASE_PATH: /DuQuantum/
       - uses: actions/upload-pages-artifact@v3
         with:
           path: game/dist

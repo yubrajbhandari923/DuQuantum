@@ -134,7 +134,7 @@ function upkeep(a: Actor, p: { x: number; z: number }, now: number, quiet: boole
 
 /** Hub behaviour state (timers, last player position). */
 const brain = { hBark: 8, sHint: 22, pause: 1, retarget: 0, reply: null as null | { at: number; text: string }, px: 0, pz: 0, still: 0, fidget: 6, level: 0 };
-export const resetBrain = (firstBarkIn = 6) => Object.assign(brain, { hBark: firstBarkIn, sHint: 20, pause: 0.5, reply: null, level: 0 });
+export const resetBrain = (firstBarkIn = 6) => Object.assign(brain, { hBark: firstBarkIn, sHint: 20, pause: 0.5, retarget: 3, reply: null, level: 0 }); // retarget: Schrödinger stands a moment before he starts following
 
 /**
  * Hub AI, called once per frame while the player walks the lab:

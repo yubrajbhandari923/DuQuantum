@@ -79,7 +79,7 @@ function Rig({ targets }: { targets: RefObject<THREE.Group> }) {
         },
         collect, waiting: () => waiting(useGame.getState()), powerOn,
         view: (x: number, z: number, yaw: number, pitch = -0.05) => { pos.current.set(x, EYE, z); look.current = { yaw, pitch }; },
-        aimed: () => useAim.getState().aimed, game: useGame, renderer: gl, scene,
+        aimed: () => useAim.getState().aimed, game: useGame, renderer: gl, scene, camera,
       };
     }
     addEventListener('keydown', down); addEventListener('keyup', up); addEventListener('mousemove', move); el.addEventListener('click', click);

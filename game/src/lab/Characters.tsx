@@ -6,6 +6,7 @@ import { clone } from 'three/examples/jsm/utils/SkeletonUtils.js';
 import { nextLevel, useGame } from '../store';
 import { think, useActors, type ActorId, type Arms, type Gesture } from './actors';
 import { asset } from '../asset';
+import { useMixamoClips } from './mixamoClips';
 
 /** Who is talking right now; Dialogue writes it, the hub lights that face. */
 export const speaker: { who: string | null } = { who: null };
@@ -148,6 +149,7 @@ type Follower = { bone: THREE.Object3D; rest: THREE.Quaternion; obj: THREE.Objec
 
 function Physicist({ c }: { c: Char }) {
   const { scene, animations } = useGLTF(asset('models/Xbot.glb'));
+  const mix = useMixamoClips();
   const skin = useMemo(() => new THREE.Color('#c99a80'), []);
   const { model, clothes, followers, recolour, skinMat } = useMemo(() => {
     const model = clone(scene);
@@ -204,6 +206,8 @@ function Physicist({ c }: { c: Char }) {
     const clip = (n: string) => animations.find((a) => a.name === n)!;
     const base = { idle: mixer.clipAction(clip('idle')), walk: mixer.clipAction(clip('walk')), run: mixer.clipAction(clip('run')) };
     for (const a of Object.values(base)) a.setEffectiveWeight(0).play();
+    const talk = mixer.clipAction(mix[c.id === 'heisenberg' ? 'talk2' : 'talk']); talk.setEffectiveWeight(0).play(); // Mixamo talking loop, blended in while standing and speaking
+    const shots = ['laugh', 'point'].map((n) => mixer.clipAction(mix[n]).setLoop(THREE.LoopOnce, 1)); // Heisenberg's taunts start with one of these
     base.idle.setEffectiveWeight(1);
     // gestures layer on top of the walk/idle as additive clips (as in three's Xbot example)
     const gest = Object.fromEntries(['agree', 'headShake', 'sad_pose', 'sneak_pose'].map((n) => {
@@ -214,9 +218,9 @@ function Physicist({ c }: { c: Char }) {
     })) as Record<Exclude<Gesture, null>, THREE.AnimationAction>;
     const bone = (n: string) => (model.getObjectByName(`mixamorig${n}`) ?? model.getObjectByName(`mixamorig:${n}`))!;
     const bones = { la: bone('LeftArm'), lf: bone('LeftForeArm'), ra: bone('RightArm'), rf: bone('RightForeArm'), neck: bone('Neck'), head: bone('Head') };
-    return { mixer, base, gest, bones };
-  }, [model, animations]);
-  const st = useRef({ ry: 0, v: 0, px: NaN, pz: 0, gesture: null as Gesture, armW: 0, arms: null as Arms, gaze: 0 });
+    return { mixer, base, gest, bones, talk, shots };
+  }, [model, animations, mix]);
+  const st = useRef({ talk: 0, said: '', nshot: 0, ry: 0, v: 0, px: NaN, pz: 0, gesture: null as Gesture, armW: 0, arms: null as Arms, gaze: 0 });
   const headObj = followers[followers.length - 1].obj;
 
   useEffect(() => () => { rig.mixer.stopAllAction(); }, [rig]);
@@ -225,7 +229,7 @@ function Physicist({ c }: { c: Char }) {
     const scr = useGame.getState().screen;
     if (scr === 'level' || scr === 'sandbox' || !root.current) return; // off camera: no animation work at all
     const dt = Math.min(rawDt, 0.1), a = useActors.getState().a[c.id], s = st.current, g = root.current;
-    g.visible = a.visible;
+    g.visible = a.visible && !(scr === 'ending' && c.id === 'heisenberg'); // he has left by the ending
     if (!a.visible) { s.px = NaN; return; }
     // facing: turn smoothly (rate-limited) toward the wanted yaw
     let dy = a.yaw - s.ry; dy = Math.atan2(Math.sin(dy), Math.cos(dy));
@@ -237,7 +241,14 @@ function Physicist({ c }: { c: Char }) {
     s.px = a.x; s.pz = a.z;
     s.v += (Math.min(5, moved / Math.max(dt, 1e-3)) - s.v) * Math.min(1, dt * 8);
     const v = s.v, run = THREE.MathUtils.clamp((v - 1.7) / 1.0, 0, 1), walk = THREE.MathUtils.clamp(v / 0.5, 0, 1) - run;
-    rig.base.idle.setEffectiveWeight(1 - walk - run);
+    const said = a.speech?.text ?? '';
+    if (c.id === 'heisenberg' && said && said !== s.said && v < 0.4) rig.shots[s.nshot++ % 2].reset().play();
+    s.said = said;
+    const shot = Math.max(0, ...rig.shots.map((x) => (x.isRunning() ? Math.min(1, x.time / 0.25, (x.getClip().duration - x.time) / 0.4) : 0)));
+    const still = 1 - walk - run;
+    s.talk += (+((!!a.speech || speaker.who === c.id) && v < 0.4) - s.talk) * Math.min(1, dt * 4);
+    rig.base.idle.setEffectiveWeight(still * (1 - shot) * (1 - s.talk)); rig.talk.setEffectiveWeight(still * (1 - shot) * s.talk);
+    for (const x of rig.shots) x.setEffectiveWeight(x.isRunning() ? still * shot : 0);
     rig.base.walk.setEffectiveWeight(walk).setEffectiveTimeScale(THREE.MathUtils.clamp(v / 1.25, 0.5, 1.6));
     rig.base.run.setEffectiveWeight(run).setEffectiveTimeScale(THREE.MathUtils.clamp(v / 3.3, 0.7, 1.4));
     if (a.gesture !== s.gesture) { // start / stop a gesture layer

@@ -9,7 +9,7 @@ A browser game: walk a 3D laboratory, step up to ten consoles, and run ten exper
 ```bash
 cd game
 npm install
-npm run dev        # http://localhost:5173/DuQuantum/
+npm run dev        # http://localhost:5173/
 npm run build      # typecheck + production build into game/dist
 npm test           # vitest: physics and level-mission tests
 ```
